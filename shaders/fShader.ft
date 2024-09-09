@@ -1,0 +1,14 @@
+#version 400 core
+
+in vec2 TexCoords;
+out vec4 colour;
+
+uniform bool menu;
+uniform sampler2D image;
+uniform vec3 spriteColour;
+
+void main()
+{
+    if (menu) colour = vec4(spriteColour * 0.35f, 1.0) * texture(image, TexCoords);
+    else colour = vec4(spriteColour * 0.8f, 1.0) * texture(image, TexCoords);
+}

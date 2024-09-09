@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="AABB.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libraries\Include\glad\glad.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="TextRenderer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AABB.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="TextRenderer.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\shaders\fShader.ft">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\fTxtShader.ft">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\vShader.vx">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\vTxtShader.vx">
+      <Filter>shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{e443665c-5425-4337-9ae2-bd3d99c7ae08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="headers">
+      <UniqueIdentifier>{7fad42d1-c735-42ea-863a-a1617df87299}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{524a1deb-e2e4-4afc-aeb4-1c32f395ef3c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
