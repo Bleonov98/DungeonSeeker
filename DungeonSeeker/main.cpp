@@ -11,6 +11,7 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, int button, int action, int mods);
+void cursor_callback(GLFWwindow* window, double xpos, double ypos);
 
 // settings
 const unsigned int SCR_WIDTH = 1600;
@@ -44,6 +45,7 @@ int main() {
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetKeyCallback(window, key_callback);
+    glfwSetCursorPosCallback(window, cursor_callback);
     glfwSetMouseButtonCallback(window, mouse_callback);
 
     gladLoadGL();
@@ -72,6 +74,8 @@ int main() {
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        if (DungeonSeeker.close) glfwSetWindowShouldClose(window, true);
     }
 
     glfwDestroyWindow(window);
@@ -87,9 +91,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-    // when a user presses the escape key, we set the WindowShouldClose property to true, closing the application
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS || DungeonSeeker.close)
-        glfwSetWindowShouldClose(window, true);
     if (key >= 0 && key < 1024)
     {
         if (action == GLFW_PRESS)
@@ -111,12 +112,10 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods)
             DungeonSeeker.mouseKeysProcessed[button] = false;
         }
     }
+}
 
-    double xpos, ypos;
-
-    //getting cursor position
-    glfwGetCursorPos(window, &xpos, &ypos);
-
+void cursor_callback(GLFWwindow* window, double xpos, double ypos)
+{
     DungeonSeeker.xMouse = xpos;
     DungeonSeeker.yMouse = ypos;
 }

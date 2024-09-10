@@ -8,8 +8,11 @@
 #include "ResourceManager.h"
 #include "GameObject.h"
 
+#include <memory>
+
 enum GameState {
 	MENU,
+	SETTINGS,
 	ACTIVE,
 	PAUSED
 };
@@ -26,6 +29,7 @@ public:
 	void Init();
 	void LoadResources();
 	void InitObjects();
+	void InitTextButtons();
 
 	void ProcessInput(float dt);
 	void Update(float dt);
@@ -50,8 +54,8 @@ private:
 
 	glm::mat4 projection;
 
-	std::vector<TextRenderer*> textButtons;
-	std::vector<GameObject*> objList;
+	std::vector<std::shared_ptr<TextButton>> textButtons;
+	std::vector<std::shared_ptr<GameObject>> objList;
 
 	int width, height;
 
