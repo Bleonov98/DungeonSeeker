@@ -62,7 +62,7 @@ private:
 
     std::string text;
     glm::vec2 position, size;
-    glm::vec3 colour = glm::vec3(0.0f);
+    glm::vec3 colour = glm::vec3(0.75f);
 
     std::function<void()> function;
 };

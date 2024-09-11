@@ -35,11 +35,13 @@ public:
 	void Update(float dt);
 
 	void Render();
+	void DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size);
 	template <typename T>
 	void DrawObject(std::vector<T*> objectVector);
 	//void DrawStats();
 
 	void Menu();
+	void Settings();
 	//void Restart();
 
 	// game
@@ -54,8 +56,14 @@ private:
 
 	glm::mat4 projection;
 
-	std::vector<std::shared_ptr<TextButton>> textButtons;
+	// buttons
+	std::vector<std::shared_ptr<TextButton>> menuButtons;
+	std::vector<std::shared_ptr<TextButton>> settingButtons;
+
+	// objects
 	std::vector<std::shared_ptr<GameObject>> objList;
+
+		// - - - some type
 
 	int width, height;
 

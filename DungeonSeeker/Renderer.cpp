@@ -37,10 +37,10 @@ void Renderer::Draw(Texture texture, std::vector<glm::mat4> instancedMatrices, s
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * instancedColours.size(), &instancedColours.data()[0], GL_STATIC_DRAW);
 
     // colour instructions
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
     
-    glVertexAttribDivisor(2, 1);
+    glVertexAttribDivisor(1, 1);
 
     // refresh matrix buffer
     unsigned int matBuffer;
@@ -50,25 +50,37 @@ void Renderer::Draw(Texture texture, std::vector<glm::mat4> instancedMatrices, s
 
     // matrix instructions
     std::size_t vec4Size = sizeof(glm::vec4);
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
     glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
     glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
 
+    glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
     glVertexAttribDivisor(5, 1);
-    glVertexAttribDivisor(6, 1);
 
     glActiveTexture(GL_TEXTURE0);
     texture.Bind();
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, instancedMatrices.size());
     glBindVertexArray(0);
+}
+
+void Renderer::DrawTexture(Texture texture)
+{
+    glActiveTexture(GL_TEXTURE0);
+    texture.Bind();
+
+    glBindVertexArray(this->VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Renderer::~Renderer()
