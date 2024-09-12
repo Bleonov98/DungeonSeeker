@@ -30,6 +30,7 @@ public:
 	void LoadResources();
 	void InitObjects();
 	void InitTextButtons();
+	void GenerateLevel();
 
 	void ProcessInput(float dt);
 	void Update(float dt);
@@ -38,6 +39,7 @@ public:
 	void DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size);
 	template <typename T>
 	void DrawObject(std::vector<T*> objectVector);
+	void DrawGrid();
 	//void DrawStats();
 
 	void Menu();

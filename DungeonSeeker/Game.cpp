@@ -27,7 +27,7 @@ void Game::LoadResources()
     ResourceManager::LoadShader("../shaders/vShader.vx", "../shaders/fShader.ft", "spriteShader");
 
     // textures
-    ResourceManager::LoadTexture("../textures/menu.png", true, "menuTexture");
+    ResourceManager::LoadTexture("../textures/main/menu.png", true, "menuTexture");
     ResourceManager::LoadTexture("../textures/main/cursor.png", true, "cursorTexture");
 }
 
@@ -59,6 +59,11 @@ void Game::InitTextButtons()
     back->Load("../fonts/Garamond.ttf", 24);
     back->SetFunction([&]() { this->gmState = MENU; });
     settingButtons.push_back(back);
+}
+
+void Game::GenerateLevel()
+{
+
 }
 
 void Game::Menu()
@@ -169,6 +174,11 @@ void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size)
     ResourceManager::GetShader("spriteShader").SetMatrix4("uModel", model);
 
     renderer->DrawTexture(texture);
+}
+
+void Game::DrawGrid()
+{
+
 }
 
 template <typename T>
