@@ -8,6 +8,9 @@
 #include "ResourceManager.h"
 #include "GameObject.h"
 
+#include "Grid.h"
+#include "Dungeon.h"
+
 #include <memory>
 
 enum GameState {

@@ -10,6 +10,7 @@ std::unique_ptr<Renderer> renderer;
 
 void Game::Init()
 {
+    srand(time(NULL));
     LoadResources();
 
     projection = glm::ortho(0.0f, static_cast<float>(this->width), static_cast<float>(this->height), 0.0f, -1.0f, 1.0f);
@@ -33,7 +34,7 @@ void Game::LoadResources()
 
 void Game::InitObjects()
 {
-
+    GenerateLevel();
 }
 
 void Game::InitTextButtons()
@@ -63,7 +64,8 @@ void Game::InitTextButtons()
 
 void Game::GenerateLevel()
 {
-
+    Dungeon* map = new Dungeon();
+    map->GenerateDungeon();
 }
 
 void Game::Menu()

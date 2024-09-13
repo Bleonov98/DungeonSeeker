@@ -34,6 +34,7 @@
     <ClCompile Include="Grid.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="Dungeon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h">
@@ -63,6 +64,7 @@
     <ClInclude Include="Grid.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="Dungeon.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\fShader.ft">
