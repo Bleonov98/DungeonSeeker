@@ -2,12 +2,37 @@
 #define DUNGEON_H
 
 #include "Grid.h"
+#include "ResourceManager.h"
 #include <memory>
 #include <vector>
 #include <map>
 
-class Room;
-class Corridor;
+struct Room
+{
+public:
+	Room() {};
+	Room(glm::vec2 position, int width, int height) : position(position), width(width), height(height) {};
+	int width, height;
+	glm::vec2 position;
+	glm::vec3 colour;
+};
+
+struct Corridor
+{
+public:
+
+};
+
+struct DungeonNode
+{
+public:
+	DungeonNode(glm::vec2 position, int width, int height) : position(position), width(width), height(height) {};
+	int width, height;
+	glm::vec2 position = glm::vec2(0.0f);
+	DungeonNode* left = nullptr;
+	DungeonNode* right = nullptr;
+	Room* room = nullptr;
+};
 
 class Dungeon
 {
@@ -16,45 +41,18 @@ public:
 	Dungeon() {};
 
 	void GenerateDungeon();
-	void SplitRoom(Room room, int step);
+	void SplitNode(DungeonNode* root, int step);
+	void GenerateRoom(DungeonNode* leaf);
+	void ConnectRooms(DungeonNode* left, DungeonNode* right);
+	void DrawDungeon();
 
 private:
 
-	std::vector<Room> dungeon;
-	std::vector<std::vector<std::shared_ptr<Grid>>> GridVec;
+	DungeonNode* dungeon; // tree root node for algorithm
+	std::vector<std::vector<std::shared_ptr<Grid>>> GridVec; // ??
 
-};
-
-class Room
-{
-public:
-
-	Room() {};
-
-	Room(glm::vec2 position, int width, int height) {
-		this->position = position;
-		this->width = width;
-		this->height = height;
-	};
-
-	void InitRoom(glm::vec2 position, int width, int height);
-
-	int GetWidth() { return width; }
-	int GetHeight() { return height; }
-	glm::vec2 GetPosition() { return position; }
-
-private:
-
-	int width, height;
-	glm::vec2 position;
-
-};
-
-class Corridor 
-{
-public:
-
-private:
+	std::vector<Room> rooms; // for drawing
+	unsigned int VAO, VBO;
 
 };
 #endif // !DUNGEON_H

@@ -7,6 +7,7 @@ std::unique_ptr<TextRenderer> text;
 ISoundEngine* sound = irrklang::createIrrKlangDevice();
 
 std::unique_ptr<Renderer> renderer;
+std::unique_ptr<Dungeon> dungeon;
 
 void Game::Init()
 {
@@ -18,6 +19,9 @@ void Game::Init()
     text->Load("../fonts/Garamond.ttf", 24);
 
     renderer = std::make_unique<Renderer>();
+
+    dungeon = std::make_unique<Dungeon>();
+    dungeon->GenerateDungeon();
 
     InitObjects();
     InitTextButtons();
@@ -157,6 +161,10 @@ void Game::Render()
     if (gmState == MENU) Menu();
     else if (gmState == SETTINGS) Settings();
 
+#ifdef _TESTING
+    dungeon->DrawDungeon();
+#endif
+
     DrawTexture(ResourceManager::GetTexture("cursorTexture"), glm::vec2(xMouse, yMouse), glm::vec2(30.0f, 32.0f));
 }
 
@@ -174,6 +182,10 @@ void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size)
     model = glm::scale(model, glm::vec3(size, 0.0f));
 
     ResourceManager::GetShader("spriteShader").SetMatrix4("uModel", model);
+
+#ifdef _TESTING
+    ResourceManager::GetShader("spriteShader").SetBool("test", false);
+#endif
 
     renderer->DrawTexture(texture);
 }

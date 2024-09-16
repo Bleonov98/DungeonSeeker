@@ -17,7 +17,8 @@ enum GameState {
 	MENU,
 	SETTINGS,
 	ACTIVE,
-	PAUSED
+	PAUSED,
+	TEST
 };
 
 class Game
@@ -72,7 +73,7 @@ private:
 
 	int width, height;
 
-	GameState gmState = MENU;
+	GameState gmState = TEST;
 };
 
 #endif // !GAME_H
