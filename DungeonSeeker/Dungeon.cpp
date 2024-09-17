@@ -26,6 +26,7 @@ void Dungeon::GenerateDungeon()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 #endif
+	// DungeonNode* dungeon = new DungeonNode(glm::vec2(0.0f), 6400, 3600);
 	DungeonNode* dungeon = new DungeonNode(glm::vec2(0.0f), 1600, 900);
 
 	SplitNode(dungeon, 4);
@@ -78,12 +79,25 @@ void Dungeon::GenerateRoom(DungeonNode* leaf)
 	randWidth = halfX + rand() % (halfX - 5);
 	randHeight = halfY + rand() % (halfY - 5);
 		
-	leaf->room = new Room(leaf->position, randWidth, randHeight);
+	int diff = abs(randWidth - randHeight);
+	if (randWidth - randHeight >= 40) randWidth -= diff - 40;
+	else if (randHeight - randWidth >= 40) randHeight -= diff - 40;
+
+	leaf->room = new Room(leaf->position + glm::vec2(leaf->width, leaf->height) / 2.0f - glm::vec2(randWidth, randHeight) / 2.0f, randWidth, randHeight);
 }
 
 void Dungeon::ConnectRooms(DungeonNode* left, DungeonNode* right)
 {
-	Corridor corr;
+	glm::vec2 leftPoint = GetNearestPoints(left, right).first;
+	glm::vec2 rightPoint = GetNearestPoints(left, right).second;
+}
+
+std::pair<glm::vec2, glm::vec2> Dungeon::GetNearestPoints(DungeonNode* left, DungeonNode* right)
+{
+	glm::vec2 pointA = glm::vec2();
+	glm::vec2 pointB = glm::vec2();
+
+	return std::pair<glm::vec2, glm::vec2>();
 }
 
 #ifdef _TESTING
