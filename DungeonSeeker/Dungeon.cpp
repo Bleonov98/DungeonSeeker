@@ -92,12 +92,77 @@ void Dungeon::ConnectRooms(DungeonNode* left, DungeonNode* right)
 	glm::vec2 rightPoint = GetNearestPoints(left, right).second;
 }
 
+// making vectors of points for every surface
+std::vector<glm::vec2> GetSurfacePointsVector(DungeonNode* node) 
+{
+	std::vector<glm::vec2> points;
+
+	for (size_t y = 0; y < node->room->height; y++)
+	{
+		for (size_t x = 0; x < node->room->width; x++)
+		{
+			glm::vec2 point = glm::vec2(node->room->position.x + x, node->room->position.y + y);
+			points.push_back(point);
+		}
+	}
+
+	return points;
+}
+
+// finding minimal points between two surfaces
+std::pair<glm::vec2, glm::vec2> BruteForce(std::vector<glm::vec2> objectA, std::vector<glm::vec2> objectB)
+{
+	float minDistance = FLT_MAX;
+	glm::vec2 closestA, closestB;
+
+	for (auto A : objectA)
+	{
+		for (auto B : objectB)
+		{
+			float distance = glm::distance(A, B);
+			if (minDistance > distance) {
+				minDistance = distance;
+				closestA = A;
+				closestB = B;
+			}
+		}
+	}
+
+	return std::make_pair(closestA, closestB);
+}
+
+// divide and conquer algorithm for finding closest pair of points
+std::pair<glm::vec2, glm::vec2> DivideFind(std::vector<glm::vec2> objectA, std::vector<glm::vec2> objectB)
+{
+	if (objectA.empty() || objectB.empty()) {
+		std::cout << "ERROR: no points vectors to find" << std::endl << "Dungeon.cpp, line 135;" << std::endl;
+		return std::make_pair(glm::vec2(0, 0), glm::vec2(0, 0));
+	}
+
+	if (objectA.size() <= 3 || objectB.size() <= 3)
+		return BruteForce(objectA, objectB);
+
+	std::vector<glm::vec2> firstHalfA(objectA.begin(), objectA.begin() + objectA.size() / 2);
+	std::vector<glm::vec2> secondHalfA(objectA.begin() + objectA.size() / 2, objectA.end());
+
+	std::vector<glm::vec2> firstHalfB(objectB.begin(), objectB.begin() + objectB.size() / 2);
+	std::vector<glm::vec2> secondHalfB(objectB.begin() + objectB.size() / 2, objectB.end());
+
+	std::pair<glm::vec2, glm::vec2> firstDivided = DivideFind(firstHalfA, firstHalfB);
+	std::pair<glm::vec2, glm::vec2> secondDivided = DivideFind(secondHalfA, secondHalfB);
+
+	float firstDistance = glm::distance(firstDivided.first, firstDivided.second);
+	float secondDistance = glm::distance(secondDivided.first, secondDivided.second);
+
+	return (firstDistance > secondDistance) ? firstDivided : secondDivided;
+}
+
 std::pair<glm::vec2, glm::vec2> Dungeon::GetNearestPoints(DungeonNode* left, DungeonNode* right)
 {
-	glm::vec2 pointA = glm::vec2();
-	glm::vec2 pointB = glm::vec2();
+	std::vector<glm::vec2> surfaceA = GetSurfacePointsVector(left);
+	std::vector<glm::vec2> surfaceB = GetSurfacePointsVector(right);
 
-	return std::pair<glm::vec2, glm::vec2>();
+	return DivideFind(surfaceA, surfaceB);
 }
 
 #ifdef _TESTING
