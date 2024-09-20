@@ -90,6 +90,9 @@ void Dungeon::ConnectRooms(DungeonNode* left, DungeonNode* right)
 {
 	glm::vec2 leftPoint = GetNearestPoints(left, right).first;
 	glm::vec2 rightPoint = GetNearestPoints(left, right).second;
+
+
+	Corridor corr(leftPoint, );
 }
 
 // making vectors of points for every surface
