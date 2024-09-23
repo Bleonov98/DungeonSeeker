@@ -60,6 +60,7 @@ private:
 
 #ifdef _TESTING
 	std::vector<Room> rooms; // for drawing
+	std::vector<Corridor> corridors; // for drawing
 	unsigned int VAO, VBO;
 #endif
 

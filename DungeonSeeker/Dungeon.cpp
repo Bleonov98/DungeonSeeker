@@ -88,11 +88,22 @@ void Dungeon::GenerateRoom(DungeonNode* leaf)
 
 void Dungeon::ConnectRooms(DungeonNode* left, DungeonNode* right)
 {
-	glm::vec2 leftPoint = GetNearestPoints(left, right).first;
-	glm::vec2 rightPoint = GetNearestPoints(left, right).second;
+	if (!left->room || !right->room) return;
 
+	std::pair<glm::vec2, glm::vec2> nearestPoints = GetNearestPoints(left, right);
+	glm::vec2 leftPoint = nearestPoints.first;
+	glm::vec2 rightPoint = nearestPoints.second;
 
-	Corridor corr(leftPoint, );
+	int minLength = 2, minWidth = 2;
+
+	int length = rightPoint.x - leftPoint.x;
+	int width = rightPoint.y - leftPoint.y;
+
+	if (length < minLength) length = minLength;
+	if (width < minWidth) width = minWidth;
+
+	Corridor corr(leftPoint, length, width);
+	corridors.push_back(corr);
 }
 
 // making vectors of points for every surface
@@ -141,7 +152,7 @@ std::pair<glm::vec2, glm::vec2> DivideFind(std::vector<glm::vec2> objectA, std::
 		std::cout << "ERROR: no points vectors to find" << std::endl << "Dungeon.cpp, line 135;" << std::endl;
 		return std::make_pair(glm::vec2(0, 0), glm::vec2(0, 0));
 	}
-
+	 
 	if (objectA.size() <= 3 || objectB.size() <= 3)
 		return BruteForce(objectA, objectB);
 
@@ -157,7 +168,20 @@ std::pair<glm::vec2, glm::vec2> DivideFind(std::vector<glm::vec2> objectA, std::
 	float firstDistance = glm::distance(firstDivided.first, firstDivided.second);
 	float secondDistance = glm::distance(secondDivided.first, secondDivided.second);
 
-	return (firstDistance > secondDistance) ? firstDivided : secondDivided;
+	float minDistance = std::min(firstDistance, secondDistance);
+	std::vector<glm::vec2> stripA;
+	std::vector<glm::vec2> stripB;
+
+	for (const auto& point : objectA) {
+		if (abs(point.x - objectA[objectA.size() / 2].x) < minDistance)
+			stripA.push_back(point);
+	}
+
+	for (const auto& point : objectB) {
+		if (abs(point.x - objectB[objectB.size() / 2].x) < minDistance)
+			stripB.push_back(point);
+	}
+
 }
 
 std::pair<glm::vec2, glm::vec2> Dungeon::GetNearestPoints(DungeonNode* left, DungeonNode* right)
@@ -187,6 +211,19 @@ void Dungeon::DrawDungeon()
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(rooms[i].position, 0.0f));
 		model = glm::scale(model, glm::vec3(rooms[i].width, rooms[i].height, 0.0f));
+
+		ResourceManager::GetShader("spriteShader").SetMatrix4("uModel", model);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+
+	for (size_t i = 0; i < corridors.size(); i++)
+	{
+		ResourceManager::GetShader("spriteShader").SetVector3f("uColour", glm::vec3(1.0f));
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(corridors[i].position, 0.0f));
+		model = glm::scale(model, glm::vec3(corridors[i].length, corridors[i].width, 0.0f));
 
 		ResourceManager::GetShader("spriteShader").SetMatrix4("uModel", model);
 
