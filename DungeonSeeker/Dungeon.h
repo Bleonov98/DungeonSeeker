@@ -14,7 +14,6 @@ public:
 	Room(glm::vec2 position, int width, int height) : position(position), width(width), height(height) {};
 	int width, height;
 	glm::vec2 position;
-	glm::vec3 colour;
 };
 
 struct Corridor
@@ -34,20 +33,21 @@ public:
 	DungeonNode* left = nullptr;
 	DungeonNode* right = nullptr;
 	Room* room = nullptr;
+	bool IsLeaf() const { return left == nullptr && right == nullptr; }
 };
 
 class Dungeon
 {
 public:
 
-	Dungeon() {};
+	Dungeon();
 
 	void GenerateDungeon();
 	void SplitNode(DungeonNode* root, int step);
 	void GenerateRoom(DungeonNode* leaf);
-	void ConnectRooms(DungeonNode* left, DungeonNode* right);
-
-	std::pair<glm::vec2, glm::vec2> GetNearestPoints(DungeonNode* left, DungeonNode* right);
+	void ConnectRooms(DungeonNode* leaf);
+	void GenerateCorridor(Room* first, Room* second);
+	Room* FindRoomInSubtree(DungeonNode* leaf);
 
 #ifdef _TESTING
 	void DrawDungeon();
@@ -56,7 +56,6 @@ public:
 private:
 
 	DungeonNode* dungeon; // tree root node for algorithm
-	std::vector<std::vector<std::shared_ptr<Grid>>> GridVec; // ??
 
 #ifdef _TESTING
 	std::vector<Room> rooms; // for drawing

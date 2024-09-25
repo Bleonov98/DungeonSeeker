@@ -21,7 +21,6 @@ void Game::Init()
     renderer = std::make_unique<Renderer>();
 
     dungeon = std::make_unique<Dungeon>();
-    dungeon->GenerateDungeon();
 
     InitObjects();
     InitTextButtons();
