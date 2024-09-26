@@ -32,7 +32,7 @@ Dungeon::Dungeon()
 
 void Dungeon::GenerateDungeon()
 {
-	DungeonNode* dungeon = new DungeonNode(glm::vec2(0.0f), 400, 240);
+	DungeonNode* dungeon = new DungeonNode(glm::vec2(0.0f), 1600, 900);
 
 	SplitNode(dungeon, 4);
 	ConnectRooms(dungeon);
@@ -115,6 +115,7 @@ void Dungeon::GenerateCorridor(Room* first, Room* second)
 
 Room* Dungeon::FindRoomInSubtree(DungeonNode* leaf)
 {
+
 	if (leaf->IsLeaf()) return leaf->room;
 	if (leaf->left) return FindRoomInSubtree(leaf->left);
 	if (leaf->right) return FindRoomInSubtree(leaf->right);

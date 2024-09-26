@@ -67,8 +67,7 @@ void Game::InitTextButtons()
 
 void Game::GenerateLevel()
 {
-    Dungeon* map = new Dungeon();
-    map->GenerateDungeon();
+
 }
 
 void Game::Menu()
