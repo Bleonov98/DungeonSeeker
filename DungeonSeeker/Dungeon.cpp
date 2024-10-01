@@ -97,29 +97,134 @@ void Dungeon::ConnectRooms(DungeonNode* leaf)
 	ConnectRooms(leaf->left);
 	ConnectRooms(leaf->right);
 
-	Room* leftRoom = FindRoomInSubtree(leaf->left);
-	Room* rightRoom = FindRoomInSubtree(leaf->right);
+	// find mid intersection point
+	glm::vec2 midPoint;
+	if (leaf->left->position.x != leaf->right->position.x) {
+		midPoint = leaf->left->position + glm::vec2(leaf->left->width, leaf->left->height / 2.0f);
+	}
+	else if (leaf->left->position.y != leaf->right->position.y) {
+		midPoint = leaf->left->position + glm::vec2(leaf->left->width / 2.0f, leaf->left->height);
+	}
+
+	Room* leftRoom = FindRoomInSubtree(leaf->left, midPoint);
+	Room* rightRoom = FindRoomInSubtree(leaf->right, midPoint);
 
 	if (leftRoom && rightRoom) {
 		GenerateCorridor(leftRoom, rightRoom);
 	}
 }
 
-void Dungeon::GenerateCorridor(Room* first, Room* second)
+// making side vector
+std::vector<glm::vec2> GetSide(Room* room, int sideNum)
 {
-	glm::vec2 center1(first->position.x + first->width / 2, first->position.y + first->height / 2);
-	glm::vec2 center2(second->position.x + second->width / 2, second->position.y + second->height / 2);
+	std::vector<glm::vec2> side;
+	switch (sideNum)
+	{
+	case 0:
+		for (size_t i = 0; i < room->height; i++)
+		{
+			side.push_back(glm::vec2(room->position.x, room->position.y + i));
+		}
+		break;
+	case 1:
+		for (size_t i = 0; i < room->width; i++)
+		{
+			side.push_back(glm::vec2(room->position.x + i, room->position.y));
+		}
+		break;
+	case 2:
+		for (size_t i = 0; i < room->height; i++)
+		{
+			side.push_back(glm::vec2(room->position.x + room->width, room->position.y + i));
+		}
+		break;
+	case 3:
+		for (size_t i = 0; i < room->width; i++)
+		{
+			side.push_back(glm::vec2(room->position.x + i, room->position.y + room->height));
+		}
+		break;
+	default:
+		break;
+	}
 
-
+	return side;
 }
 
-Room* Dungeon::FindRoomInSubtree(DungeonNode* leaf)
+// finding nearest sides
+std::vector<std::vector<glm::vec2>> GetNearestSides(Room* left, Room* right)
 {
+	std::vector<std::vector<glm::vec2>> sides;
 
+	// sides [0, 1, 2, 3] = left,top,right,bot;
+	std::vector<glm::vec2> leftSides{ glm::vec2(left->position.x, left->position.y + left->height / 2.0f), glm::vec2(left->position.x + left->width / 2.0f, left->position.y), 
+		glm::vec2(left->position.x + left->width, left->position.y + left->height / 2.0f), glm::vec2(left->position.x + left->width / 2.0f, left->position.y + left->height) };
+	std::vector<glm::vec2> rightSides{ glm::vec2(right->position.x, right->position.y + right->height / 2.0f), glm::vec2(right->position.x + right->width / 2.0f, right->position.y),
+		glm::vec2(right->position.x + right->width, right->position.y + right->height / 2.0f), glm::vec2(right->position.x + right->width / 2.0f, right->position.y + right->height) };
+
+	std::pair<int, int> cnt;
+	float minValue = FLT_MAX;
+	for (size_t i = 0; i < leftSides.size(); i++)
+	{
+		for (size_t j = 0; j < rightSides.size(); j++)
+		{
+			float distance = glm::distance(leftSides[i], rightSides[j]);
+			if (distance < minValue) {
+				minValue = distance;
+				cnt.first = i;
+				cnt.second = j;
+			}
+		}
+	}
+
+	sides.push_back(GetSide(left, cnt.first));
+	sides.push_back(GetSide(right, cnt.second));
+
+	return sides;
+}
+
+// finding nearest points
+std::pair<glm::vec2, glm::vec2> GetNearestPoints(std::vector<glm::vec2> first, std::vector<glm::vec2> second)
+{
+	std::pair<glm::vec2, glm::vec2> nearestPoints;
+	float minValue = FLT_MAX;
+	for (size_t i = 0; i < first.size(); i++)
+	{
+		for (size_t j = 0; j < second.size(); j++)
+		{
+			float distance = glm::distance(first[i], second[j]);
+			if (distance < minValue) {
+				minValue = distance;
+				nearestPoints.first = first[i];
+				nearestPoints.second = second[j];
+			}
+		}
+	}
+
+	return nearestPoints;
+}
+
+void Dungeon::GenerateCorridor(Room* first, Room* second)
+{
+	std::vector<std::vector<glm::vec2>> sides = GetNearestSides(first, second);
+	std::pair<glm::vec2, glm::vec2> nearestPoints = GetNearestPoints(sides[0], sides[1]);
+
+	if (nearestPoints.first.x == nearestPoints.second.x || nearestPoints.first.y == nearestPoints.second.y) {
+			
+	}
+}
+
+Room* Dungeon::FindRoomInSubtree(DungeonNode* leaf, glm::vec2 midPoint)
+{
 	if (leaf->IsLeaf()) return leaf->room;
-	if (leaf->left) return FindRoomInSubtree(leaf->left);
-	if (leaf->right) return FindRoomInSubtree(leaf->right);
-	return nullptr;
+
+	Room* leftRoom = FindRoomInSubtree(leaf->left, midPoint);
+	Room* rightRoom = FindRoomInSubtree(leaf->right, midPoint);	
+	
+	if (glm::distance(leftRoom->position + glm::vec2(leftRoom->width, leftRoom->height) / 2.0f, midPoint) <=
+		glm::distance(rightRoom->position + glm::vec2(rightRoom->width, rightRoom->height) / 2.0f, midPoint)) 
+		return leftRoom;
+	else return rightRoom;
 }
 
 #ifdef _TESTING

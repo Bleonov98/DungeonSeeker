@@ -47,7 +47,7 @@ public:
 	void GenerateRoom(DungeonNode* leaf);
 	void ConnectRooms(DungeonNode* leaf);
 	void GenerateCorridor(Room* first, Room* second);
-	Room* FindRoomInSubtree(DungeonNode* leaf);
+	Room* FindRoomInSubtree(DungeonNode* leaf, glm::vec2 midPoint);
 
 #ifdef _TESTING
 	void DrawDungeon();
