@@ -55,7 +55,7 @@ public:
 
 private:
 
-	DungeonNode* dungeon; // tree root node for algorithm
+	DungeonNode* dungeon;
 
 #ifdef _TESTING
 	std::vector<Room> rooms; // for drawing

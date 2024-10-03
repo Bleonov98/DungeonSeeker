@@ -186,8 +186,11 @@ std::vector<std::vector<glm::vec2>> GetNearestSides(Room* left, Room* right)
 // finding nearest points
 std::pair<glm::vec2, glm::vec2> GetNearestPoints(std::vector<glm::vec2> first, std::vector<glm::vec2> second)
 {
-	std::pair<glm::vec2, glm::vec2> nearestPoints;
-	float minValue = FLT_MAX;
+	std::pair<glm::vec2, glm::vec2> nearestPoints = std::make_pair(first[first.size() / 2], second[second.size() / 2]);
+	float minValue = glm::distance(nearestPoints.first, nearestPoints.second) - 0.01f;
+
+	std::vector<std::pair<glm::vec2, glm::vec2>> samePoints;
+
 	for (size_t i = 0; i < first.size(); i++)
 	{
 		for (size_t j = 0; j < second.size(); j++)
@@ -197,9 +200,17 @@ std::pair<glm::vec2, glm::vec2> GetNearestPoints(std::vector<glm::vec2> first, s
 				minValue = distance;
 				nearestPoints.first = first[i];
 				nearestPoints.second = second[j];
+
+				samePoints.clear();
+				samePoints.push_back(nearestPoints);
+			}
+			else if (distance == minValue) {
+				samePoints.push_back(std::make_pair(first[i], second[j]));
 			}
 		}
 	}
+
+	if (!samePoints.empty()) nearestPoints = samePoints[samePoints.size() / 2];
 
 	return nearestPoints;
 }
@@ -209,8 +220,23 @@ void Dungeon::GenerateCorridor(Room* first, Room* second)
 	std::vector<std::vector<glm::vec2>> sides = GetNearestSides(first, second);
 	std::pair<glm::vec2, glm::vec2> nearestPoints = GetNearestPoints(sides[0], sides[1]);
 
-	if (nearestPoints.first.x == nearestPoints.second.x || nearestPoints.first.y == nearestPoints.second.y) {
-			
+	if ((first->position.x >= second->position.x && first->position.x <= second->position.x + second->width) ||
+		(second->position.x >= first->position.x && second->position.x <= first->position.x + first->width)  || 
+		(first->position.y >= second->position.y && first->position.y <= second->position.y + second->height) ||
+		(second->position.y >= first->position.y && second->position.y <= first->position.y + first->height)) // straight corridor
+	{
+		int length, width;
+		length = nearestPoints.second.x - nearestPoints.first.x;
+		width = nearestPoints.second.y - nearestPoints.first.y;
+
+		if (width <= 0) width = 5;
+		else if (length <= 0) length = 5;
+
+		Corridor cor(nearestPoints.first, length, width);
+		corridors.push_back(cor);
+	}
+	else { // Z shaped
+
 	}
 }
 
