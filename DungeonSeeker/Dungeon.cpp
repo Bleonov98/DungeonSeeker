@@ -187,7 +187,7 @@ std::vector<std::vector<glm::vec2>> GetNearestSides(Room* left, Room* right)
 std::pair<glm::vec2, glm::vec2> GetNearestPoints(std::vector<glm::vec2> first, std::vector<glm::vec2> second)
 {
 	std::pair<glm::vec2, glm::vec2> nearestPoints = std::make_pair(first[first.size() / 2], second[second.size() / 2]);
-	float minValue = glm::distance(nearestPoints.first, nearestPoints.second) - 0.01f;
+	float minValue = glm::distance(nearestPoints.first, nearestPoints.second);
 
 	std::vector<std::pair<glm::vec2, glm::vec2>> samePoints;
 
