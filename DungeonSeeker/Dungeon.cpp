@@ -1,5 +1,7 @@
 #include "Dungeon.h"
 
+#include <optional>
+
 Dungeon::Dungeon()
 {
 #ifdef _TESTING
@@ -107,7 +109,7 @@ void Dungeon::ConnectRooms(DungeonNode* leaf)
 	}
 
 	Room* leftRoom = FindRoomInSubtree(leaf->left, midPoint);
-	Room* rightRoom = FindRoomInSubtree(leaf->right, midPoint);
+	Room* rightRoom = FindRoomInSubtree(leaf->right, leftRoom->position + glm::vec2(leftRoom->width, leftRoom->height) / 2.0f);
 
 	if (leftRoom && rightRoom) {
 		GenerateCorridor(leftRoom, rightRoom);
@@ -215,28 +217,92 @@ std::pair<glm::vec2, glm::vec2> GetNearestPoints(std::vector<glm::vec2> first, s
 	return nearestPoints;
 }
 
+// ray intersecion struct
+struct IntersectionResult {
+	glm::vec2 point;
+	bool parallel;
+	float t;
+	float s;
+};
+
+// finding intersection point
+std::optional<IntersectionResult> IntersectRays(glm::vec2 P1, glm::vec2 D1, glm::vec2 P2, glm::vec2 D2) {
+
+	float denominator = D1.x * D2.y - D1.y * D2.x;
+
+	bool isParallel = false;
+	if (fabs(denominator) < 1e-6) {
+		isParallel = true;
+	}
+
+	float t = (P2.x * D2.y - P2.y * D2.x - P1.x * D2.y + P1.y * D2.x) / denominator;
+	float s = (P1.x * D1.y - P1.y * D1.x - P2.x * D1.y + P2.y * D1.x) / denominator;
+
+	if (t >= 0 && s >= 0) {
+		glm::vec2 intersectionPoint = P1 + t * D1;
+		return IntersectionResult{ intersectionPoint, isParallel, t, s };
+	}
+
+	return std::nullopt;
+}
+
 void Dungeon::GenerateCorridor(Room* first, Room* second)
 {
 	std::vector<std::vector<glm::vec2>> sides = GetNearestSides(first, second);
 	std::pair<glm::vec2, glm::vec2> nearestPoints = GetNearestPoints(sides[0], sides[1]);
+
+	int length, width;
 
 	if ((first->position.x >= second->position.x && first->position.x <= second->position.x + second->width) ||
 		(second->position.x >= first->position.x && second->position.x <= first->position.x + first->width)  || 
 		(first->position.y >= second->position.y && first->position.y <= second->position.y + second->height) ||
 		(second->position.y >= first->position.y && second->position.y <= first->position.y + first->height)) // straight corridor
 	{
-		int length, width;
 		length = nearestPoints.second.x - nearestPoints.first.x;
 		width = nearestPoints.second.y - nearestPoints.first.y;
 
-		if (width <= 0) width = 5;
-		else if (length <= 0) length = 5;
+		if (width <= 0) width = 9;
+		else if (length <= 0) length = 9;
 
-		Corridor cor(nearestPoints.first, length, width);
+		Corridor cor(nearestPoints.first, length + 1, width + 1);
 		corridors.push_back(cor);
 	}
 	else { // Z shaped
 
+		// middle side points
+		glm::vec2 firstPoint = sides[0][sides[0].size() / 2];
+		glm::vec2 secondPoint = sides[1][sides[1].size() / 2];
+
+		// diff
+		length = secondPoint.x - firstPoint.x;
+		width = secondPoint.y - firstPoint.y;
+		
+		// direction vectors based on difference, dir1 - x, dir2 - y;
+		glm::vec2 dir1(glm::normalize(glm::vec2(length, 0.0f)));
+		glm::vec2 dir2(glm::normalize(glm::vec2(0.0f, width)));
+
+		// result - 2 surfaces intersection point
+		std::optional<IntersectionResult> result{ IntersectRays(firstPoint, dir1, secondPoint, dir2) }; // 1st case - first point (surface 1) direction goes by x, second goes by y;
+		
+		if (result) {
+			if (!result->parallel) {
+				glm::vec2 corrP1 = firstPoint;
+				if (result->point.x < firstPoint.x) corrP1 = result->point; // define first corridor position that goes by x;
+				Corridor cor1(corrP1, abs(length), 10);
+				corridors.push_back(cor1);
+
+				glm::vec2 corrP2 = result->point;
+				if (result->point.y > secondPoint.y) corrP2 = secondPoint; // second corridor position from the end of first to second point or vise versa
+				Corridor cor2(corrP2, 10, abs(width));
+				corridors.push_back(cor2);
+			}
+			else {
+
+			}
+		}
+		else { 
+			
+		}
 	}
 }
 
