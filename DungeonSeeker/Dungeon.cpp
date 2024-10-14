@@ -208,24 +208,6 @@ void Dungeon::GenerateCorridor(Room* first, Room* second)
 			Corridor cor2(corrP2, 10, std::abs(width));
 			corridors.push_back(cor2);
 		}
-		else { 
-			
-		}
-
-		//int threshold1 = 4, threshold2 = 3;
-
-		//if (dif.x > dif.y && dif.x >= threshold1 && dif.y >= threshold2) // Z shaped vertical
-		//{
-
-		//}
-		//else if (dif.y > dif.x && dif.y >= threshold1 && dif.x >= threshold2) // Z shaped horizontal
-		//{
-
-		//}
-		//else // L shaped
-		//{
-
-		//}
 	}
 }
 
