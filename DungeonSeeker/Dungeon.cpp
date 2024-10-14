@@ -85,7 +85,7 @@ void Dungeon::GenerateRoom(DungeonNode* leaf)
 	randWidth = halfX + rand() % (halfX - 5);
 	randHeight = halfY + rand() % (halfY - 5);
 		
-	int diff = abs(randWidth - randHeight);
+	int diff = std::abs(randWidth - randHeight);
 	if (randWidth - randHeight >= 40) randWidth -= diff - 40;
 	else if (randHeight - randWidth >= 40) randHeight -= diff - 40;
 
@@ -116,103 +116,32 @@ void Dungeon::ConnectRooms(DungeonNode* leaf)
 	}
 }
 
-// making side vector
-std::vector<glm::vec2> GetSide(Room* room, int sideNum)
-{
-	std::vector<glm::vec2> side;
-	switch (sideNum)
-	{
-	case 0:
-		for (size_t i = 0; i < room->height; i++)
-		{
-			side.push_back(glm::vec2(room->position.x, room->position.y + i));
-		}
-		break;
-	case 1:
-		for (size_t i = 0; i < room->width; i++)
-		{
-			side.push_back(glm::vec2(room->position.x + i, room->position.y));
-		}
-		break;
-	case 2:
-		for (size_t i = 0; i < room->height; i++)
-		{
-			side.push_back(glm::vec2(room->position.x + room->width, room->position.y + i));
-		}
-		break;
-	case 3:
-		for (size_t i = 0; i < room->width; i++)
-		{
-			side.push_back(glm::vec2(room->position.x + i, room->position.y + room->height));
-		}
-		break;
-	default:
-		break;
-	}
-
-	return side;
-}
-
-// finding nearest sides
-std::vector<std::vector<glm::vec2>> GetNearestSides(Room* left, Room* right)
-{
-	std::vector<std::vector<glm::vec2>> sides;
-
-	// sides [0, 1, 2, 3] = left,top,right,bot;
-	std::vector<glm::vec2> leftSides{ glm::vec2(left->position.x, left->position.y + left->height / 2.0f), glm::vec2(left->position.x + left->width / 2.0f, left->position.y), 
-		glm::vec2(left->position.x + left->width, left->position.y + left->height / 2.0f), glm::vec2(left->position.x + left->width / 2.0f, left->position.y + left->height) };
-	std::vector<glm::vec2> rightSides{ glm::vec2(right->position.x, right->position.y + right->height / 2.0f), glm::vec2(right->position.x + right->width / 2.0f, right->position.y),
-		glm::vec2(right->position.x + right->width, right->position.y + right->height / 2.0f), glm::vec2(right->position.x + right->width / 2.0f, right->position.y + right->height) };
-
-	std::pair<int, int> cnt;
-	float minValue = FLT_MAX;
-	for (size_t i = 0; i < leftSides.size(); i++)
-	{
-		for (size_t j = 0; j < rightSides.size(); j++)
-		{
-			float distance = glm::distance(leftSides[i], rightSides[j]);
-			if (distance < minValue) {
-				minValue = distance;
-				cnt.first = i;
-				cnt.second = j;
-			}
-		}
-	}
-
-	sides.push_back(GetSide(left, cnt.first));
-	sides.push_back(GetSide(right, cnt.second));
-
-	return sides;
-}
-
 // finding nearest points
-std::pair<glm::vec2, glm::vec2> GetNearestPoints(std::vector<glm::vec2> first, std::vector<glm::vec2> second)
+std::pair<glm::vec2, glm::vec2> GetNearestPoints(Room* first, Room* second)
 {
-	std::pair<glm::vec2, glm::vec2> nearestPoints = std::make_pair(first[first.size() / 2], second[second.size() / 2]);
-	float minValue = glm::distance(nearestPoints.first, nearestPoints.second);
+	std::pair<glm::vec2, glm::vec2> nearestPoints;
 
-	std::vector<std::pair<glm::vec2, glm::vec2>> samePoints;
+	// diff between centres 
+	glm::vec2 firstMid = first->position + glm::vec2(first->width, first->height) / 2.0f;
+	glm::vec2 secondMid = second->position + glm::vec2(second->width, second->height) / 2.0f;
 
-	for (size_t i = 0; i < first.size(); i++)
-	{
-		for (size_t j = 0; j < second.size(); j++)
-		{
-			float distance = glm::distance(first[i], second[j]);
-			if (distance < minValue) {
-				minValue = distance;
-				nearestPoints.first = first[i];
-				nearestPoints.second = second[j];
+	glm::vec2 dif = secondMid - firstMid;
+	dif = glm::normalize(dif);
 
-				samePoints.clear();
-				samePoints.push_back(nearestPoints);
-			}
-			else if (distance == minValue) {
-				samePoints.push_back(std::make_pair(first[i], second[j]));
-			}
-		}
+	if (std::abs(dif.x) > std::abs(dif.y)) {
+		nearestPoints.first = firstMid + dif * (first->width / 2.0f);
+		nearestPoints.second = secondMid - dif * (second->width / 2.0f);
+	}
+	else {
+		nearestPoints.first = firstMid + dif * (first->height / 2.0f);
+		nearestPoints.second = secondMid - dif * (second->height / 2.0f);
 	}
 
-	if (!samePoints.empty()) nearestPoints = samePoints[samePoints.size() / 2];
+	nearestPoints.first.x = std::max(first->position.x, std::min(nearestPoints.first.x, first->position.x + first->width - 1));
+	nearestPoints.first.y = std::max(first->position.y, std::min(nearestPoints.first.y, first->position.y + first->height - 1));
+
+	nearestPoints.second.x = std::max(second->position.x, std::min(nearestPoints.second.x, second->position.x + second->width - 1));
+	nearestPoints.second.y = std::max(second->position.y, std::min(nearestPoints.second.y, second->position.y + second->height - 1));
 
 	return nearestPoints;
 }
@@ -220,9 +149,6 @@ std::pair<glm::vec2, glm::vec2> GetNearestPoints(std::vector<glm::vec2> first, s
 // ray intersecion struct
 struct IntersectionResult {
 	glm::vec2 point;
-	bool parallel;
-	float t;
-	float s;
 };
 
 // finding intersection point
@@ -240,7 +166,7 @@ std::optional<IntersectionResult> IntersectRays(glm::vec2 P1, glm::vec2 D1, glm:
 
 	if (t >= 0 && s >= 0) {
 		glm::vec2 intersectionPoint = P1 + t * D1;
-		return IntersectionResult{ intersectionPoint, isParallel, t, s };
+		return IntersectionResult{ intersectionPoint };
 	}
 
 	return std::nullopt;
@@ -248,61 +174,58 @@ std::optional<IntersectionResult> IntersectRays(glm::vec2 P1, glm::vec2 D1, glm:
 
 void Dungeon::GenerateCorridor(Room* first, Room* second)
 {
-	std::vector<std::vector<glm::vec2>> sides = GetNearestSides(first, second);
-	std::pair<glm::vec2, glm::vec2> nearestPoints = GetNearestPoints(sides[0], sides[1]);
+	std::pair<glm::vec2, glm::vec2> nearestPoints = GetNearestPoints(first, second);
 
-	int length, width;
+	glm::vec2 dif = nearestPoints.second - nearestPoints.first;
+	int length = nearestPoints.second.x - nearestPoints.first.x;
+	int width = nearestPoints.second.y - nearestPoints.first.y;
 
-	if ((first->position.x >= second->position.x && first->position.x <= second->position.x + second->width) ||
-		(second->position.x >= first->position.x && second->position.x <= first->position.x + first->width)  || 
-		(first->position.y >= second->position.y && first->position.y <= second->position.y + second->height) ||
-		(second->position.y >= first->position.y && second->position.y <= first->position.y + first->height)) // straight corridor
+	if (dif.y == 0 || dif.x == 0) // straight corridor
 	{
-		length = nearestPoints.second.x - nearestPoints.first.x;
-		width = nearestPoints.second.y - nearestPoints.first.y;
+		if (width <= 0 || width < length) width = 8;
+		else if (length <= 0 || length < width) length = 8;
 
-		if (width <= 0) width = 9;
-		else if (length <= 0) length = 9;
-
-		Corridor cor(nearestPoints.first, length + 1, width + 1);
+		Corridor cor(nearestPoints.first, length + 2, width + 2);
 		corridors.push_back(cor);
 	}
 	else { // Z shaped
 
-		// middle side points
-		glm::vec2 firstPoint = sides[0][sides[0].size() / 2];
-		glm::vec2 secondPoint = sides[1][sides[1].size() / 2];
-
-		// diff
-		length = secondPoint.x - firstPoint.x;
-		width = secondPoint.y - firstPoint.y;
-		
 		// direction vectors based on difference, dir1 - x, dir2 - y;
 		glm::vec2 dir1(glm::normalize(glm::vec2(length, 0.0f)));
 		glm::vec2 dir2(glm::normalize(glm::vec2(0.0f, width)));
 
 		// result - 2 surfaces intersection point
-		std::optional<IntersectionResult> result{ IntersectRays(firstPoint, dir1, secondPoint, dir2) }; // 1st case - first point (surface 1) direction goes by x, second goes by y;
+		std::optional<IntersectionResult> result{ IntersectRays(nearestPoints.first, dir1, nearestPoints.second, dir2) }; // 1st case - first point (surface 1) direction goes by x, second goes by y;
 		
 		if (result) {
-			if (!result->parallel) {
-				glm::vec2 corrP1 = firstPoint;
-				if (result->point.x < firstPoint.x) corrP1 = result->point; // define first corridor position that goes by x;
-				Corridor cor1(corrP1, abs(length), 10);
-				corridors.push_back(cor1);
+			glm::vec2 corrP1 = nearestPoints.first;
+			if (result->point.x < nearestPoints.first.x) corrP1 = result->point; // define first corridor position that goes by x;
+			Corridor cor1(corrP1, std::abs(length + 10), 10);
+			corridors.push_back(cor1);
 
-				glm::vec2 corrP2 = result->point;
-				if (result->point.y > secondPoint.y) corrP2 = secondPoint; // second corridor position from the end of first to second point or vise versa
-				Corridor cor2(corrP2, 10, abs(width));
-				corridors.push_back(cor2);
-			}
-			else {
-
-			}
+			glm::vec2 corrP2 = result->point;
+			if (result->point.y > nearestPoints.second.y) corrP2 = nearestPoints.second; // second corridor position from the end of first to second point or vise versa
+			Corridor cor2(corrP2, 10, std::abs(width));
+			corridors.push_back(cor2);
 		}
 		else { 
 			
 		}
+
+		//int threshold1 = 4, threshold2 = 3;
+
+		//if (dif.x > dif.y && dif.x >= threshold1 && dif.y >= threshold2) // Z shaped vertical
+		//{
+
+		//}
+		//else if (dif.y > dif.x && dif.y >= threshold1 && dif.x >= threshold2) // Z shaped horizontal
+		//{
+
+		//}
+		//else // L shaped
+		//{
+
+		//}
 	}
 }
 
@@ -333,7 +256,7 @@ void Dungeon::DrawDungeon()
 
 	for (size_t i = 0; i < rooms.size(); i++)
 	{
-		ResourceManager::GetShader("spriteShader").SetVector3f("uColour", glm::vec3(0.05f * i, 0.01f * i, 0.2f * i));
+		ResourceManager::GetShader("spriteShader").SetVector3f("uColour", glm::vec3(0.5f));
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(rooms[i].position, 0.0f));
@@ -346,7 +269,7 @@ void Dungeon::DrawDungeon()
 
 	for (size_t i = 0; i < corridors.size(); i++)
 	{
-		ResourceManager::GetShader("spriteShader").SetVector3f("uColour", glm::vec3(1.0f));
+		ResourceManager::GetShader("spriteShader").SetVector3f("uColour", glm::vec3(0.5f));
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(corridors[i].position, 0.0f));
