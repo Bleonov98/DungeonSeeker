@@ -65,9 +65,46 @@ void Game::InitTextButtons()
     settingButtons.push_back(back);
 }
 
+void Game::SetGrid()
+{
+    grid.resize(height, std::vector<int>(width));
+
+    for (size_t i = 0; i < height; i++)
+    {
+        for (size_t j = 0; j < width; j++)
+        {
+            grid[i][j] = 99;
+        }
+    }
+
+    for (size_t i = 0; i < dungeon->rooms.size(); i++)
+    {
+        for (size_t j = 0; j < dungeon->rooms[i].height; j++)
+        {
+            for (size_t k = 0; k < dungeon->rooms[i].width; k++)
+            {
+                grid[std::round(dungeon->rooms[i].position.y + j)][std::round(dungeon->rooms[i].position.x + k)] = 1;
+            }
+        }
+    }
+
+    for (size_t i = 0; i < dungeon->corridors.size(); i++)
+    {
+        for (size_t j = 0; j < dungeon->corridors[i].width; j++)
+        {
+            for (size_t k = 0; k < dungeon->corridors[i].length; k++)
+            {
+                grid[std::round(dungeon->corridors[i].position.y + j)][std::round(dungeon->corridors[i].position.x + k)] = 1;
+            }
+        }
+    }
+
+}
+
 void Game::GenerateLevel()
 {
-
+    dungeon->GenerateDungeon();
+    SetGrid();
 }
 
 void Game::Menu()
@@ -156,12 +193,13 @@ void Game::Render()
 {
     // background/map/stats
 
-    if (gmState == MENU) Menu();
-    else if (gmState == SETTINGS) Settings();
 
 #ifdef _TESTING
     dungeon->DrawDungeon();
 #endif
+
+    if (gmState == MENU) Menu();
+    else if (gmState == SETTINGS) Settings();
 
     DrawTexture(ResourceManager::GetTexture("cursorTexture"), glm::vec2(xMouse, yMouse), glm::vec2(30.0f, 32.0f));
 }
@@ -186,11 +224,6 @@ void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size)
 #endif
 
     renderer->DrawTexture(texture);
-}
-
-void Game::DrawGrid()
-{
-
 }
 
 template <typename T>

@@ -8,7 +8,6 @@
 #include "ResourceManager.h"
 #include "GameObject.h"
 
-#include "Grid.h"
 #include "Dungeon.h"
 
 #include <memory>
@@ -17,8 +16,7 @@ enum GameState {
 	MENU,
 	SETTINGS,
 	ACTIVE,
-	PAUSED,
-	TEST
+	PAUSED
 };
 
 class Game
@@ -34,6 +32,7 @@ public:
 	void LoadResources();
 	void InitObjects();
 	void InitTextButtons();
+	void SetGrid();
 	void GenerateLevel();
 
 	void ProcessInput(float dt);
@@ -43,7 +42,6 @@ public:
 	void DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size);
 	template <typename T>
 	void DrawObject(std::vector<T*> objectVector);
-	void DrawGrid();
 	//void DrawStats();
 
 	void Menu();
@@ -66,6 +64,9 @@ private:
 	std::vector<std::shared_ptr<TextButton>> menuButtons;
 	std::vector<std::shared_ptr<TextButton>> settingButtons;
 
+	// 
+	std::vector<std::vector<int>> grid;
+
 	// objects
 	std::vector<std::shared_ptr<GameObject>> objList;
 
@@ -73,7 +74,7 @@ private:
 
 	int width, height;
 
-	GameState gmState = TEST;
+	GameState gmState = MENU;
 };
 
 #endif // !GAME_H

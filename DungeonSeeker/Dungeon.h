@@ -1,7 +1,6 @@
 #ifndef DUNGEON_H
 #define DUNGEON_H
 
-#include "Grid.h"
 #include "ResourceManager.h"
 #include <memory>
 #include <vector>
@@ -43,11 +42,9 @@ public:
 	Dungeon();
 
 	void GenerateDungeon();
-	void SplitNode(DungeonNode* root, int step);
-	void GenerateRoom(DungeonNode* leaf);
-	void ConnectRooms(DungeonNode* leaf);
-	void GenerateCorridor(Room* first, Room* second);
-	Room* FindRoomInSubtree(DungeonNode* leaf, glm::vec2 midPoint);
+
+	std::vector<Room> rooms;
+	std::vector<Corridor> corridors;
 
 #ifdef _TESTING
 	void DrawDungeon();
@@ -55,11 +52,15 @@ public:
 
 private:
 
+	void SplitNode(DungeonNode* root, int step);
+	void GenerateRoom(DungeonNode* leaf);
+	void ConnectRooms(DungeonNode* leaf);
+	void GenerateCorridor(Room* first, Room* second);
+	Room* FindRoomInSubtree(DungeonNode* leaf, glm::vec2 midPoint);
+
 	DungeonNode* dungeon;
 
 #ifdef _TESTING
-	std::vector<Room> rooms; // for drawing
-	std::vector<Corridor> corridors; // for drawing
 	unsigned int VAO, VBO;
 #endif
 

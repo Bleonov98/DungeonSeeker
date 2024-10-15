@@ -31,9 +31,6 @@
     <ClCompile Include="GameObject.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="Grid.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="Dungeon.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -61,9 +58,6 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Grid.h">
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Dungeon.h">

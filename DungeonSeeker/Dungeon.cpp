@@ -28,8 +28,6 @@ Dungeon::Dungeon()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 #endif
-
-	GenerateDungeon();
 }
 
 void Dungeon::GenerateDungeon()
@@ -79,8 +77,8 @@ void Dungeon::GenerateRoom(DungeonNode* leaf)
 {
 	int randWidth, randHeight, halfX, halfY;
 
-	halfX = leaf->width / 2;
-	halfY = leaf->height / 2;
+	halfX = std::round(leaf->width / 2);
+	halfY = std::round(leaf->height / 2);
 
 	randWidth = halfX + rand() % (halfX - 5);
 	randHeight = halfY + rand() % (halfY - 5);
@@ -188,7 +186,7 @@ void Dungeon::GenerateCorridor(Room* first, Room* second)
 		Corridor cor(nearestPoints.first, length + 2, width + 2);
 		corridors.push_back(cor);
 	}
-	else { // Z shaped
+	else { // L shaped
 
 		// direction vectors based on difference, dir1 - x, dir2 - y;
 		glm::vec2 dir1(glm::normalize(glm::vec2(length, 0.0f)));
