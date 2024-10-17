@@ -33,6 +33,9 @@ void Game::LoadResources()
     // textures
     ResourceManager::LoadTexture("../textures/main/menu.png", true, "menuTexture");
     ResourceManager::LoadTexture("../textures/main/cursor.png", true, "cursorTexture");
+
+    // map
+
 }
 
 void Game::InitObjects()
@@ -67,13 +70,15 @@ void Game::InitTextButtons()
 
 void Game::SetGrid()
 {
-    grid.resize(height, std::vector<int>(width));
+    grid.resize(height, std::vector<std::shared_ptr<Grid>>(width));
 
     for (size_t i = 0; i < height; i++)
     {
         for (size_t j = 0; j < width; j++)
         {
-            grid[i][j] = 99;
+            std::shared_ptr<Grid> cell = std::make_shared<Grid>(MAINTILE);
+            cell->cellPosition = glm::vec2(cell->cellSize.x * j, cell->cellSize.y * i);
+            grid[i][j] = cell;
         }
     }
 
@@ -83,7 +88,7 @@ void Game::SetGrid()
         {
             for (size_t k = 0; k < dungeon->rooms[i].width; k++)
             {
-                grid[std::round(dungeon->rooms[i].position.y + j)][std::round(dungeon->rooms[i].position.x + k)] = 1;
+                grid[std::round(dungeon->rooms[i].position.y + j)][std::round(dungeon->rooms[i].position.x + k)]->data = MAINTILE;
             }
         }
     }
@@ -94,11 +99,20 @@ void Game::SetGrid()
         {
             for (size_t k = 0; k < dungeon->corridors[i].length; k++)
             {
-                grid[std::round(dungeon->corridors[i].position.y + j)][std::round(dungeon->corridors[i].position.x + k)] = 1;
+                grid[std::round(dungeon->corridors[i].position.y + j)][std::round(dungeon->corridors[i].position.x + k)]->data = MAINTILE;
             }
         }
     }
 
+    //for (size_t i = 0; i < height; i++)
+    //{
+    //    for (size_t j = 0; j < width; j++)
+    //    {
+    //        if (grid[i][j]->data == MAINTILE && grid[i - 1][j]->data == EMPTY)
+    //            grid[i][j]->data = TOP;
+    //        else if (grid[i][j]->data == MAINTILE && grid[i][j + 1]->data == )
+    //    }
+    //}
 }
 
 void Game::GenerateLevel()

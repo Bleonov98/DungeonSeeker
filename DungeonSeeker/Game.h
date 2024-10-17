@@ -12,11 +12,28 @@
 
 #include <memory>
 
+// to place textures on grid
+enum TileType {
+	EMPTY,
+	MAINTILE,
+	TOP,
+	RIGHT,
+	BOT,
+	LEFT
+};
+
 enum GameState {
 	MENU,
 	SETTINGS,
 	ACTIVE,
 	PAUSED
+};
+
+struct Grid {
+public:
+	Grid(int data) : data(data) {};
+	int data;
+	glm::vec2 cellPosition, cellSize = glm::vec2(20.0f);
 };
 
 class Game
@@ -65,7 +82,7 @@ private:
 	std::vector<std::shared_ptr<TextButton>> settingButtons;
 
 	// 
-	std::vector<std::vector<int>> grid;
+	std::vector<std::vector<std::shared_ptr<Grid>>> grid;
 
 	// objects
 	std::vector<std::shared_ptr<GameObject>> objList;
