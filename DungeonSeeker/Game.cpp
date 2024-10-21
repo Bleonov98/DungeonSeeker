@@ -104,15 +104,63 @@ void Game::SetGrid()
         }
     }
 
-    //for (size_t i = 0; i < height; i++)
-    //{
-    //    for (size_t j = 0; j < width; j++)
-    //    {
-    //        if (grid[i][j]->data == MAINTILE && grid[i - 1][j]->data == EMPTY)
-    //            grid[i][j]->data = TOP;
-    //        else if (grid[i][j]->data == MAINTILE && grid[i][j + 1]->data == )
-    //    }
-    //}
+    // !
+    for (size_t i = 5; i < height - 5; i++)
+    {
+        for (size_t j = 5; j < width - 5; j++)
+        {
+            for (size_t cnt = 1; cnt <= 5; cnt++)
+            {
+                if (grid[i][j]->data == MAINTILE) {
+                    grid[i - cnt][j - cnt]->data = MAINTILE;
+                    grid[i - cnt][j]->data = MAINTILE;
+                    grid[i - cnt][j + cnt]->data = MAINTILE;
+                    grid[i][j - cnt]->data = MAINTILE;
+                    grid[i][j + cnt]->data = MAINTILE;
+                    grid[i + cnt][j - cnt]->data = MAINTILE;
+                    grid[i + cnt][j]->data = MAINTILE;
+                    grid[i + cnt][j + cnt]->data = MAINTILE;
+                }
+            }
+        }
+    }
+
+    for (size_t i = 1; i < height - 1; i++) 
+    {
+        for (size_t j = 1; j < width - 1; j++) 
+        {
+            // define tiletype
+            // TOP SIDE
+            if (grid[i][j]->data == MAINTILE && grid[i - 1][j]->data == EMPTY) {
+                grid[i - 1][j]->data = TOP;
+                
+                if (grid[i][j - 1]->data == EMPTY)
+                    grid[i][j]->data = CORNER_TOP_LEFT;
+                else if (grid[i][j + 1]->data == EMPTY)
+                    grid[i][j]->data = CORNER_TOP_RIGHT; 
+            }
+            // BOT SIDE
+            else if (grid[i][j]->data == MAINTILE && grid[i][j + 1]->data == EMPTY) {
+                grid[i][j + 1]->data = RIGHT;
+
+                if ()
+            }
+                
+            else if (grid[i][j]->data == MAINTILE && grid[i + 1][j]->data == EMPTY)
+                grid[i + 1][j]->data = BOT;
+            else if (grid[i][j]->data == MAINTILE && grid[i][j - 1]->data == EMPTY)
+                grid[i][j - 1]->data = LEFT;
+
+            if (grid[i][j]->data == MAINTILE && grid[i - 1][j]->data == EMPTY && )
+                grid[i - 1][j - 1]->data = 
+            else if (grid[i][j]->data == MAINTILE && grid[i - 1][j]->data == EMPTY && )
+                grid[i][j]->data = CORNER_TOP_RIGHT;
+            else if (grid[i][j]->data == MAINTILE && grid[i + 1][j - 1]->data == EMPTY)
+                grid[i + 1][j - 1]->data = CORNER_BOT_LEFT;
+            else if (grid[i][j]->data == MAINTILE && grid[i + 1][j + 1]->data == EMPTY)
+                grid[i + 1][j + 1]->data = CORNER_BOT_RIGHT;
+        }
+    }
 }
 
 void Game::GenerateLevel()
