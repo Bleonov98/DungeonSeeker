@@ -38,7 +38,6 @@ public:
 	Grid(int data) : data(data) {};
 	int data;
 	glm::vec2 cellPosition, cellSize = glm::vec2(20.0f);
-	std::string texName;
 };
 
 class Game

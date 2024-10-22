@@ -35,6 +35,7 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("../textures/main/cursor.png", true, "cursorTexture");
 
     // map
+    ResourceManager::LoadTexture("../textures/map/menu.png", true, "menuTexture");
 
 }
 
@@ -131,34 +132,31 @@ void Game::SetGrid()
         {
             // define tiletype
             // TOP SIDE
-            if (grid[i][j]->data == MAINTILE && grid[i - 1][j]->data == EMPTY) {
-                grid[i - 1][j]->data = TOP;
-                
+            if (grid[i][j]->data == MAINTILE && grid[i - 1][j]->data == EMPTY) 
+            {
                 if (grid[i][j - 1]->data == EMPTY)
                     grid[i][j]->data = CORNER_TOP_LEFT;
                 else if (grid[i][j + 1]->data == EMPTY)
-                    grid[i][j]->data = CORNER_TOP_RIGHT; 
+                    grid[i][j]->data = CORNER_TOP_RIGHT;
+                else
+                    grid[i][j]->data = TOP;
             }
             // BOT SIDE
-            else if (grid[i][j]->data == MAINTILE && grid[i][j + 1]->data == EMPTY) {
-                grid[i][j + 1]->data = RIGHT;
-
-                if ()
+            else if (grid[i][j]->data == MAINTILE && grid[i + 1][j]->data == EMPTY) 
+            {
+                if (grid[i][j - 1]->data == EMPTY)
+                    grid[i][j]->data = CORNER_BOT_LEFT;
+                else if (grid[i][j + 1]->data == EMPTY)
+                    grid[i][j]->data = CORNER_BOT_RIGHT;
+                else
+                    grid[i][j]->data = BOT;
             }
-                
-            else if (grid[i][j]->data == MAINTILE && grid[i + 1][j]->data == EMPTY)
-                grid[i + 1][j]->data = BOT;
+            // RIGHT SIDE
+            else if (grid[i][j]->data == MAINTILE && grid[i][j + 1]->data == EMPTY)
+                grid[i][j]->data = RIGHT;
+            // LEFT SIDE
             else if (grid[i][j]->data == MAINTILE && grid[i][j - 1]->data == EMPTY)
-                grid[i][j - 1]->data = LEFT;
-
-            if (grid[i][j]->data == MAINTILE && grid[i - 1][j]->data == EMPTY && )
-                grid[i - 1][j - 1]->data = 
-            else if (grid[i][j]->data == MAINTILE && grid[i - 1][j]->data == EMPTY && )
-                grid[i][j]->data = CORNER_TOP_RIGHT;
-            else if (grid[i][j]->data == MAINTILE && grid[i + 1][j - 1]->data == EMPTY)
-                grid[i + 1][j - 1]->data = CORNER_BOT_LEFT;
-            else if (grid[i][j]->data == MAINTILE && grid[i + 1][j + 1]->data == EMPTY)
-                grid[i + 1][j + 1]->data = CORNER_BOT_RIGHT;
+                grid[i][j]->data = LEFT;
         }
     }
 }
