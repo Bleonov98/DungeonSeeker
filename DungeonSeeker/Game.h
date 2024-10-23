@@ -40,6 +40,16 @@ public:
 	glm::vec2 cellPosition, cellSize = glm::vec2(20.0f);
 };
 
+struct MapObject {
+public:
+	MapObject(std::string textureName, glm::vec2 position, glm::vec2 size) : textureName(textureName) {
+		mapMat = glm::translate(mapMat, glm::vec3(position, 0.0f));
+		mapMat = glm::scale(mapMat, glm::vec3(size, 0.0f));
+	};
+	std::string textureName;
+	glm::mat4 mapMat;
+};
+
 class Game
 {
 public:
@@ -53,14 +63,19 @@ public:
 	void LoadResources();
 	void InitObjects();
 	void InitTextButtons();
-	void SetGrid();
-	void GenerateLevel();
 
 	void ProcessInput(float dt);
 	void Update(float dt);
 
+	// level generation
+	void GenerateLevel();
+	void SetGrid();
+	void SetTile();
+
+	// render
 	void Render();
 	void DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size);
+	void DrawMapObject(std::vector<MapObject> objects);
 	template <typename T>
 	void DrawObject(std::vector<T*> objectVector);
 	//void DrawStats();
@@ -85,8 +100,9 @@ private:
 	std::vector<std::shared_ptr<TextButton>> menuButtons;
 	std::vector<std::shared_ptr<TextButton>> settingButtons;
 
-	// 
+	// map
 	std::vector<std::vector<std::shared_ptr<Grid>>> grid;
+	std::vector<std::shared_ptr<MapObject>> mainTileList;
 
 	// objects
 	std::vector<std::shared_ptr<GameObject>> objList;

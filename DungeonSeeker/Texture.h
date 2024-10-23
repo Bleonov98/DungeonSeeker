@@ -18,6 +18,7 @@ public:
     void SetAlpha(bool alpha) { this->alpha = alpha; }
     void SetFormatAlpha() { imgFormat = intFormat = GL_RGBA; }
 
+    unsigned int GetID() { return this->ID; }
 
 private:
 

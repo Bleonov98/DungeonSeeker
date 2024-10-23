@@ -35,7 +35,11 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("../textures/main/cursor.png", true, "cursorTexture");
 
     // map
-    ResourceManager::LoadTexture("../textures/map/menu.png", true, "menuTexture");
+    ResourceManager::LoadTexture("../textures/map/main_tile.png", true, "mainTile");
+    ResourceManager::LoadTexture("../textures/map/main_tile_crack.png", true, "mainTileCrack");
+    ResourceManager::LoadTexture("../textures/map/main_tile_stone_0.png", true, "mainTileStone0");
+    ResourceManager::LoadTexture("../textures/map/main_tile_stone_1.png", true, "mainTileStone1");
+    ResourceManager::LoadTexture("../textures/map/main_tile_stone_2.png", true, "mainTileStone2");
 
 }
 
@@ -69,6 +73,31 @@ void Game::InitTextButtons()
     settingButtons.push_back(back);
 }
 
+void Game::Menu()
+{
+    DrawTexture(ResourceManager::GetTexture("menuTexture"), glm::vec2(650.0f, 275.0f), glm::vec2(300.0f));
+
+    text->RenderText("MENU", glm::vec2(this->width / 2.0f - 65.0f, this->height / 2.0f - 120.0f), 1.75f);
+
+    for (size_t i = 0; i < menuButtons.size(); i++)
+    {
+        menuButtons[i]->RenderButton(1.0f);
+    }
+}
+
+void Game::Settings()
+{
+    DrawTexture(ResourceManager::GetTexture("menuTexture"), glm::vec2(650.0f, 275.0f), glm::vec2(300.0f));
+
+    text->RenderText("SETTINGS", glm::vec2(this->width / 2.0f - 95.0f, this->height / 2.0f - 120.0f), 1.75f);
+
+    for (auto i : settingButtons)
+    {
+        i->RenderButton(1.0f);
+    }
+}
+
+// level generation
 void Game::SetGrid()
 {
     grid.resize(height, std::vector<std::shared_ptr<Grid>>(width));
@@ -161,34 +190,25 @@ void Game::SetGrid()
     }
 }
 
+void Game::SetTile()
+{
+    for (size_t i = 0; i < grid.size(); i++)
+    {
+        for (size_t j = 0; j < grid[i].size(); j++)
+        {
+            if (grid[i][j]->data == MAINTILE) {
+
+                mainTileList.push_back();
+            }
+        }
+    }
+}
+
 void Game::GenerateLevel()
 {
     dungeon->GenerateDungeon();
     SetGrid();
-}
-
-void Game::Menu()
-{
-    DrawTexture(ResourceManager::GetTexture("menuTexture"), glm::vec2(650.0f, 275.0f), glm::vec2(300.0f));
-
-    text->RenderText("MENU", glm::vec2(this->width / 2.0f - 65.0f, this->height / 2.0f - 120.0f), 1.75f);
-
-    for (size_t i = 0; i < menuButtons.size(); i++)
-    {
-        menuButtons[i]->RenderButton(1.0f);
-    }
-}
-
-void Game::Settings()
-{
-    DrawTexture(ResourceManager::GetTexture("menuTexture"), glm::vec2(650.0f, 275.0f), glm::vec2(300.0f));
-
-    text->RenderText("SETTINGS", glm::vec2(this->width / 2.0f - 95.0f, this->height / 2.0f - 120.0f), 1.75f);
-
-    for (auto i : settingButtons)
-    {
-        i->RenderButton(1.0f);
-    }
+    SetTile();
 }
 
 // main
@@ -284,6 +304,29 @@ void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size)
 #endif
 
     renderer->DrawTexture(texture);
+}
+
+void Game::DrawMapObject(std::vector<MapObject> objects)
+{
+    ResourceManager::GetShader("spriteShader").Use();
+    ResourceManager::GetShader("spriteShader").SetMatrix4("projection", projection);
+
+    std::vector<glm::mat4> instMat;
+    std::vector<glm::vec3> instCol(objects.size(), glm::vec3(1.0f));
+    std::vector<GLuint> textureIDs;
+
+    for (auto i : objects)
+    {
+        instMat.push_back(i.mapMat);
+        textureIDs.push_back(ResourceManager::GetTexture(i.textureName).GetID());
+    }
+
+    ResourceManager::GetShader("spriteShader").SetBool("instanced", true);
+
+    if (gmState != ACTIVE) ResourceManager::GetShader("spriteShader").SetBool("menu", true);
+    else ResourceManager::GetShader("spriteShader").SetBool("menu", false);
+
+    renderer->Draw(instMat, instCol, textureIDs);
 }
 
 template <typename T>

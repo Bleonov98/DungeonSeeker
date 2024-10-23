@@ -2,6 +2,7 @@
 
 in vec2 TexCoords;
 in vec3 spriteColour;
+in flat uint texIndex;
 out vec4 colour;
 
 uniform bool menu;
