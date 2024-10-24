@@ -40,7 +40,6 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("../textures/map/main_tile_stone_0.png", true, "mainTileStone0");
     ResourceManager::LoadTexture("../textures/map/main_tile_stone_1.png", true, "mainTileStone1");
     ResourceManager::LoadTexture("../textures/map/main_tile_stone_2.png", true, "mainTileStone2");
-
 }
 
 void Game::InitObjects()
@@ -100,13 +99,13 @@ void Game::Settings()
 // level generation
 void Game::SetGrid()
 {
-    grid.resize(height, std::vector<std::shared_ptr<Grid>>(width));
+    grid.resize(dungeon->GetHeight(), std::vector<std::shared_ptr<Grid>>(dungeon->GetWidth()));
 
-    for (size_t i = 0; i < height; i++)
+    for (size_t i = 0; i < grid.size(); i++)
     {
-        for (size_t j = 0; j < width; j++)
+        for (size_t j = 0; j < grid[i].size(); j++)
         {
-            std::shared_ptr<Grid> cell = std::make_shared<Grid>(MAINTILE);
+            std::shared_ptr<Grid> cell = std::make_shared<Grid>(EMPTY);
             cell->cellPosition = glm::vec2(cell->cellSize.x * j, cell->cellSize.y * i);
             grid[i][j] = cell;
         }
@@ -134,30 +133,9 @@ void Game::SetGrid()
         }
     }
 
-    // !
-    for (size_t i = 5; i < height - 5; i++)
+    for (size_t i = 1; i < grid.size() - 1; i++)
     {
-        for (size_t j = 5; j < width - 5; j++)
-        {
-            for (size_t cnt = 1; cnt <= 5; cnt++)
-            {
-                if (grid[i][j]->data == MAINTILE) {
-                    grid[i - cnt][j - cnt]->data = MAINTILE;
-                    grid[i - cnt][j]->data = MAINTILE;
-                    grid[i - cnt][j + cnt]->data = MAINTILE;
-                    grid[i][j - cnt]->data = MAINTILE;
-                    grid[i][j + cnt]->data = MAINTILE;
-                    grid[i + cnt][j - cnt]->data = MAINTILE;
-                    grid[i + cnt][j]->data = MAINTILE;
-                    grid[i + cnt][j + cnt]->data = MAINTILE;
-                }
-            }
-        }
-    }
-
-    for (size_t i = 1; i < height - 1; i++) 
-    {
-        for (size_t j = 1; j < width - 1; j++) 
+        for (size_t j = 1; j < grid[i].size() - 1; j++)
         {
             // define tiletype
             // TOP SIDE
@@ -192,13 +170,21 @@ void Game::SetGrid()
 
 void Game::SetTile()
 {
+    std::vector<std::string> nameList;
+    for (auto i : ResourceManager::textures)
+    {
+        if (i.first.find("mainTile") != std::string::npos) nameList.push_back(i.first);
+    }
+
     for (size_t i = 0; i < grid.size(); i++)
     {
         for (size_t j = 0; j < grid[i].size(); j++)
         {
             if (grid[i][j]->data == MAINTILE) {
 
-                mainTileList.push_back();
+                std::shared_ptr<MapObject> tile = std::make_shared<MapObject>(nameList[rand() % nameList.size()], grid[i][j]->cellPosition, grid[i][j]->cellSize);
+                tile->textureID = ResourceManager::GetTexture(tile->textureName).GetID();
+                mainTileList.push_back(tile);
             }
         }
     }
@@ -206,7 +192,7 @@ void Game::SetTile()
 
 void Game::GenerateLevel()
 {
-    dungeon->GenerateDungeon();
+    dungeon->GenerateDungeon(width / 15.0f, height / 15.0f);
     SetGrid();
     SetTile();
 }
@@ -272,7 +258,7 @@ void Game::Update(float dt)
 void Game::Render()
 {
     // background/map/stats
-
+    DrawMapObject(mainTileList);
 
 #ifdef _TESTING
     dungeon->DrawDungeon();
@@ -306,7 +292,7 @@ void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size)
     renderer->DrawTexture(texture);
 }
 
-void Game::DrawMapObject(std::vector<MapObject> objects)
+void Game::DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects)
 {
     ResourceManager::GetShader("spriteShader").Use();
     ResourceManager::GetShader("spriteShader").SetMatrix4("projection", projection);
@@ -317,14 +303,18 @@ void Game::DrawMapObject(std::vector<MapObject> objects)
 
     for (auto i : objects)
     {
-        instMat.push_back(i.mapMat);
-        textureIDs.push_back(ResourceManager::GetTexture(i.textureName).GetID());
+        instMat.push_back(i->mapMat);
+        textureIDs.push_back(i->textureID);
     }
 
     ResourceManager::GetShader("spriteShader").SetBool("instanced", true);
 
     if (gmState != ACTIVE) ResourceManager::GetShader("spriteShader").SetBool("menu", true);
     else ResourceManager::GetShader("spriteShader").SetBool("menu", false);
+
+#ifdef _TESTING
+    ResourceManager::GetShader("spriteShader").SetBool("test", false);
+#endif
 
     renderer->Draw(instMat, instCol, textureIDs);
 }

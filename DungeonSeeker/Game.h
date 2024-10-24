@@ -37,7 +37,7 @@ struct Grid {
 public:
 	Grid(int data) : data(data) {};
 	int data;
-	glm::vec2 cellPosition, cellSize = glm::vec2(20.0f);
+	glm::vec2 cellPosition, cellSize = glm::vec2(10.0f);
 };
 
 struct MapObject {
@@ -47,6 +47,7 @@ public:
 		mapMat = glm::scale(mapMat, glm::vec3(size, 0.0f));
 	};
 	std::string textureName;
+	GLuint textureID;
 	glm::mat4 mapMat;
 };
 
@@ -75,7 +76,7 @@ public:
 	// render
 	void Render();
 	void DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size);
-	void DrawMapObject(std::vector<MapObject> objects);
+	void DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects);
 	template <typename T>
 	void DrawObject(std::vector<T*> objectVector);
 	//void DrawStats();

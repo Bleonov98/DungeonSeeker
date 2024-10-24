@@ -2,18 +2,18 @@
 
 in vec2 TexCoords;
 in vec3 spriteColour;
-in flat uint texIndex;
+in flat int fragTexIndex;
 out vec4 colour;
 
 uniform bool menu;
-uniform sampler2D image;
+uniform sampler2D image[16];
 
 uniform bool test;
 
 void main()
 {
-    if (menu) colour = vec4(spriteColour * 0.35f, 1.0) * texture(image, TexCoords);
-    else colour = vec4(spriteColour * 0.8f, 1.0) * texture(image, TexCoords);
+    if (menu) colour = vec4(spriteColour * 0.35f, 1.0) * texture(image[fragTexIndex], TexCoords);
+    else colour = vec4(spriteColour * 0.8f, 1.0) * texture(image[fragTexIndex], TexCoords);
 
     if (test)
         colour = vec4(spriteColour, 1.0f);

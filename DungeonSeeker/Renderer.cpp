@@ -77,15 +77,34 @@ void Renderer::Draw(std::vector<glm::mat4> instancedMatrices, std::vector<glm::v
 {
     glBindVertexArray(this->VAO);
 
+    // make unique IDs
+    std::vector<GLuint> uniqueID;
+    for (size_t i = 0; i < textureIDs.size(); i++)
+    {
+        if (std::find(uniqueID.begin(), uniqueID.end(), textureIDs[i]) == uniqueID.end()) {
+            uniqueID.push_back(textureIDs[i]);
+        }
+    }
+
+    // make IDs for shader
+    std::vector<GLint> sTextureIDs; 
+    for (size_t i = 0; i < textureIDs.size(); i++)
+    {
+        for (size_t j = 0; j < uniqueID.size(); j++)
+        {
+            if (textureIDs[i] == uniqueID[j]) sTextureIDs.push_back(j);
+        }
+    }
+
     // Refresh texture ID buffer
     unsigned int textureVBO;
     glGenBuffers(1, &textureVBO);
     glBindBuffer(GL_ARRAY_BUFFER, textureVBO);
-    glBufferData(GL_ARRAY_BUFFER, textureIDs.size() * sizeof(unsigned int), &textureIDs[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sTextureIDs.size() * sizeof(int), &sTextureIDs[0], GL_STATIC_DRAW);
 
     // IDs instructions
     glEnableVertexAttribArray(1);
-    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(unsigned int), (void*)0);
+    glVertexAttribIPointer(1, 1, GL_INT, sizeof(int), (void*)0);
     glVertexAttribDivisor(1, 1);
 
     // ------------------------------------------
@@ -123,16 +142,15 @@ void Renderer::Draw(std::vector<glm::mat4> instancedMatrices, std::vector<glm::v
     glVertexAttribDivisor(5, 1);
     glVertexAttribDivisor(6, 1);
 
-    // make unique IDs
-    std::unordered_set<GLuint> uniqueID(textureIDs.begin(), textureIDs.end());
-
     for (size_t i = 0; i < uniqueID.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, textureIDs[i]);
+        glBindTexture(GL_TEXTURE_2D, uniqueID[i]);
     }
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, instancedMatrices.size());
+
+    glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(0);
 }
 

@@ -30,9 +30,10 @@ Dungeon::Dungeon()
 #endif
 }
 
-void Dungeon::GenerateDungeon()
+void Dungeon::GenerateDungeon(int width, int height)
 {
-	DungeonNode* dungeon = new DungeonNode(glm::vec2(0.0f), 1600, 900);
+	this->width = width, this->height = height;
+	DungeonNode* dungeon = new DungeonNode(glm::vec2(0.0f), width, height);
 
 	SplitNode(dungeon, 4);
 	ConnectRooms(dungeon);
@@ -80,12 +81,15 @@ void Dungeon::GenerateRoom(DungeonNode* leaf)
 	halfX = std::round(leaf->width / 2);
 	halfY = std::round(leaf->height / 2);
 
-	randWidth = halfX + rand() % (halfX - 5);
-	randHeight = halfY + rand() % (halfY - 5);
+	randWidth = halfX + rand() % (halfX + static_cast<int>(halfX * 0.25f));
+	randHeight = halfY + rand() % (halfY + static_cast<int>(halfY * 0.25f));
 		
+	// for different dungeon sizes, delete when I've done
+	int percent = static_cast<int>(width * 0.02f);
+
 	int diff = std::abs(randWidth - randHeight);
-	if (randWidth - randHeight >= 40) randWidth -= diff - 40;
-	else if (randHeight - randWidth >= 40) randHeight -= diff - 40;
+	if (randWidth - randHeight >= percent) randWidth -= diff - percent;
+	else if (randHeight - randWidth >= percent) randHeight -= diff - percent;
 
 	leaf->room = new Room(leaf->position + glm::vec2(leaf->width, leaf->height) / 2.0f - glm::vec2(randWidth, randHeight) / 2.0f, randWidth, randHeight);
 }
@@ -174,16 +178,20 @@ void Dungeon::GenerateCorridor(Room* first, Room* second)
 {
 	std::pair<glm::vec2, glm::vec2> nearestPoints = GetNearestPoints(first, second);
 
+	// DELETE
+	int minValue = static_cast<int>(width * 0.005f);
+	if (minValue < 1) minValue = 1;
+
 	glm::vec2 dif = nearestPoints.second - nearestPoints.first;
 	int length = nearestPoints.second.x - nearestPoints.first.x;
 	int width = nearestPoints.second.y - nearestPoints.first.y;
 
 	if (dif.y == 0 || dif.x == 0) // straight corridor
 	{
-		if (width <= 0 || width < length) width = 8;
-		else if (length <= 0 || length < width) length = 8;
+		if (width <= 0 || width < length) width = minValue;
+		else if (length <= 0 || length < width) length = minValue;
 
-		Corridor cor(nearestPoints.first, length + 2, width + 2);
+		Corridor cor(nearestPoints.first, length, width);
 		corridors.push_back(cor);
 	}
 	else { // L shaped
@@ -198,12 +206,12 @@ void Dungeon::GenerateCorridor(Room* first, Room* second)
 		if (result) {
 			glm::vec2 corrP1 = nearestPoints.first;
 			if (result->point.x < nearestPoints.first.x) corrP1 = result->point; // define first corridor position that goes by x;
-			Corridor cor1(corrP1, std::abs(length + 10), 10);
+			Corridor cor1(corrP1, std::abs(length + minValue), minValue);
 			corridors.push_back(cor1);
 
 			glm::vec2 corrP2 = result->point;
 			if (result->point.y > nearestPoints.second.y) corrP2 = nearestPoints.second; // second corridor position from the end of first to second point or vise versa
-			Corridor cor2(corrP2, 10, std::abs(width));
+			Corridor cor2(corrP2, minValue, std::abs(width));
 			corridors.push_back(cor2);
 		}
 	}

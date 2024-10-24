@@ -21,11 +21,12 @@ public:
 
 	static Texture GetTexture(std::string name);
 
+	static std::map<std::string, Texture> textures;
+
 private:
 
 	ResourceManager() {};
 
-	static std::map<std::string, Texture> textures;
 	static std::map<std::string, Shader> shaders;
 
 	static Texture LoadTextureFromFile(const char* fileName, bool alpha);

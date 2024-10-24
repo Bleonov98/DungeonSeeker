@@ -41,8 +41,9 @@ public:
 
 	Dungeon();
 
-	void GenerateDungeon();
-
+	void GenerateDungeon(int width, int height);
+	int GetWidth() { return this->width; }
+	int GetHeight() { return this->height; }
 	std::vector<Room> rooms;
 	std::vector<Corridor> corridors;
 
@@ -59,6 +60,7 @@ private:
 	Room* FindRoomInSubtree(DungeonNode* leaf, glm::vec2 midPoint);
 
 	DungeonNode* dungeon;
+	int width = 0, height = 0;
 
 #ifdef _TESTING
 	unsigned int VAO, VBO;
