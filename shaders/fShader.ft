@@ -6,7 +6,7 @@ in flat int fragTexIndex;
 out vec4 colour;
 
 uniform bool menu;
-uniform sampler2D image[16];
+uniform sampler2D image[8];
 
 uniform bool test;
 

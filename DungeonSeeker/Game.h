@@ -87,6 +87,9 @@ public:
 
 	// game
 
+	// utility
+	int GetRandomNumber(int min, int max);
+	
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], mouseKeys[8], mouseKeysProcessed[8], close = false;
 	float xMouse, yMouse;

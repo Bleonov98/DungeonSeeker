@@ -75,6 +75,8 @@ void Renderer::Draw(Texture texture, std::vector<glm::mat4> instancedMatrices, s
 
 void Renderer::Draw(std::vector<glm::mat4> instancedMatrices, std::vector<glm::vec3> instancedColours, std::vector<GLuint> textureIDs)
 {
+    Shader& shader = ResourceManager::GetShader("spriteShader").Use();
+
     glBindVertexArray(this->VAO);
 
     // make unique IDs
@@ -146,6 +148,7 @@ void Renderer::Draw(std::vector<glm::mat4> instancedMatrices, std::vector<glm::v
     {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, uniqueID[i]);
+        glUniform1i(glGetUniformLocation(shader.GetID(), ("image[" + std::to_string(i) + "]").c_str()), i);
     }
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, instancedMatrices.size());

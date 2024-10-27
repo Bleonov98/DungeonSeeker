@@ -182,7 +182,7 @@ void Game::SetTile()
         {
             if (grid[i][j]->data == MAINTILE) {
 
-                std::shared_ptr<MapObject> tile = std::make_shared<MapObject>(nameList[rand() % nameList.size()], grid[i][j]->cellPosition, grid[i][j]->cellSize);
+                std::shared_ptr<MapObject> tile = std::make_shared<MapObject>(nameList[GetRandomNumber(0, nameList.size())], grid[i][j]->cellPosition, grid[i][j]->cellSize);
                 tile->textureID = ResourceManager::GetTexture(tile->textureName).GetID();
                 mainTileList.push_back(tile);
             }
@@ -192,7 +192,7 @@ void Game::SetTile()
 
 void Game::GenerateLevel()
 {
-    dungeon->GenerateDungeon(width / 15.0f, height / 15.0f);
+    dungeon->GenerateDungeon(width / 10.0f, height / 10.0f);
     SetGrid();
     SetTile();
 }
@@ -317,6 +317,23 @@ void Game::DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects)
 #endif
 
     renderer->Draw(instMat, instCol, textureIDs);
+}
+
+int Game::GetRandomNumber(int min, int max)
+{
+    int pseudoRandNum = 0;
+    static int number = 0;
+
+    if (number > 14) {
+        number = 0;
+        pseudoRandNum = min + rand() % (max - min);
+    }
+    else {
+        pseudoRandNum = min;
+    }
+
+    number++;
+    return pseudoRandNum;
 }
 
 template <typename T>
