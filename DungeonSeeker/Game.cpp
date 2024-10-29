@@ -308,9 +308,7 @@ void Game::DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects)
     }
 
     ResourceManager::GetShader("spriteShader").SetBool("instanced", true);
-
-    if (gmState != ACTIVE) ResourceManager::GetShader("spriteShader").SetBool("menu", true);
-    else ResourceManager::GetShader("spriteShader").SetBool("menu", false);
+    ResourceManager::GetShader("spriteShader").SetBool("menu", gmState == MENU);
 
 #ifdef _TESTING
     ResourceManager::GetShader("spriteShader").SetBool("test", false);

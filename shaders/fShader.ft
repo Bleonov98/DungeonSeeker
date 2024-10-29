@@ -6,14 +6,14 @@ in flat int fragTexIndex;
 out vec4 colour;
 
 uniform bool menu;
-uniform sampler2D image[8];
+uniform sampler2DArray image;
 
 uniform bool test;
 
 void main()
 {
-    if (menu) colour = vec4(spriteColour * 0.35f, 1.0) * texture(image[fragTexIndex], TexCoords);
-    else colour = vec4(spriteColour * 0.8f, 1.0) * texture(image[fragTexIndex], TexCoords);
+    if (menu) colour = vec4(spriteColour * 0.35f, 1.0) * texture(image, vec3(TexCoords, fragTexIndex));
+    else colour = vec4(spriteColour * 0.8f, 1.0) * texture(image, vec3(TexCoords, fragTexIndex));
 
     if (test)
         colour = vec4(spriteColour, 1.0f);

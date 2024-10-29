@@ -17,6 +17,9 @@ void Renderer::InitRenderData()
 
     glGenVertexArrays(1, &this->VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &colourVBO);
+    glGenBuffers(1, &matBuffer);
+    glGenBuffers(1, &textureVBO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -33,8 +36,6 @@ void Renderer::Draw(Texture texture, std::vector<glm::mat4> instancedMatrices, s
     glBindVertexArray(this->VAO);
 
     // refresh colour buffer
-    unsigned int colourVBO;
-    glGenBuffers(1, &colourVBO);
     glBindBuffer(GL_ARRAY_BUFFER, colourVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * instancedColours.size(), &instancedColours.data()[0], GL_STATIC_DRAW);
 
@@ -45,8 +46,6 @@ void Renderer::Draw(Texture texture, std::vector<glm::mat4> instancedMatrices, s
     glVertexAttribDivisor(1, 1);
 
     // refresh matrix buffer
-    unsigned int matBuffer;
-    glGenBuffers(1, &matBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, matBuffer);
     glBufferData(GL_ARRAY_BUFFER, instancedMatrices.size() * sizeof(glm::mat4), &instancedMatrices.data()[0], GL_STATIC_DRAW);
 
@@ -75,9 +74,9 @@ void Renderer::Draw(Texture texture, std::vector<glm::mat4> instancedMatrices, s
 
 void Renderer::Draw(std::vector<glm::mat4> instancedMatrices, std::vector<glm::vec3> instancedColours, std::vector<GLuint> textureIDs)
 {
-    Shader& shader = ResourceManager::GetShader("spriteShader").Use();
-
     glBindVertexArray(this->VAO);
+
+    Shader& shader = ResourceManager::GetShader("spriteShader").Use();
 
     // make unique IDs
     std::vector<GLuint> uniqueID;
@@ -90,31 +89,27 @@ void Renderer::Draw(std::vector<glm::mat4> instancedMatrices, std::vector<glm::v
 
     // make IDs for shader
     std::vector<GLint> sTextureIDs; 
-    for (size_t i = 0; i < textureIDs.size(); i++)
+    for (int i = 0; i < textureIDs.size(); i++)
     {
-        for (size_t j = 0; j < uniqueID.size(); j++)
+        for (int j = 0; j < uniqueID.size(); j++)
         {
             if (textureIDs[i] == uniqueID[j]) sTextureIDs.push_back(j);
         }
     }
 
     // Refresh texture ID buffer
-    unsigned int textureVBO;
-    glGenBuffers(1, &textureVBO);
     glBindBuffer(GL_ARRAY_BUFFER, textureVBO);
-    glBufferData(GL_ARRAY_BUFFER, sTextureIDs.size() * sizeof(int), &sTextureIDs[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sTextureIDs.size() * sizeof(int), sTextureIDs.data(), GL_STATIC_DRAW);
 
     // IDs instructions
     glEnableVertexAttribArray(1);
-    glVertexAttribIPointer(1, 1, GL_INT, sizeof(int), (void*)0);
+    glVertexAttribIPointer(1, 1, GL_INT, sizeof(GLint), (void*)0);
     glVertexAttribDivisor(1, 1);
 
     // ------------------------------------------
     // refresh colour buffer
-    unsigned int colourVBO;
-    glGenBuffers(1, &colourVBO);
     glBindBuffer(GL_ARRAY_BUFFER, colourVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * instancedColours.size(), &instancedColours.data()[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * instancedColours.size(), instancedColours.data(), GL_STATIC_DRAW);
 
     // colour instructions
     glEnableVertexAttribArray(2);
@@ -123,10 +118,8 @@ void Renderer::Draw(std::vector<glm::mat4> instancedMatrices, std::vector<glm::v
 
     // ------------------------------------------
     // refresh matrix buffer
-    unsigned int matBuffer;
-    glGenBuffers(1, &matBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, matBuffer);
-    glBufferData(GL_ARRAY_BUFFER, instancedMatrices.size() * sizeof(glm::mat4), &instancedMatrices.data()[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, instancedMatrices.size() * sizeof(glm::mat4), instancedMatrices.data(), GL_STATIC_DRAW);
 
     // matrix instructions
     std::size_t vec4Size = sizeof(glm::vec4);
@@ -146,9 +139,8 @@ void Renderer::Draw(std::vector<glm::mat4> instancedMatrices, std::vector<glm::v
 
     for (size_t i = 0; i < uniqueID.size(); i++)
     {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, uniqueID[i]);
-        glUniform1i(glGetUniformLocation(shader.GetID(), ("image[" + std::to_string(i) + "]").c_str()), i);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, uniqueID[i]);
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, layers, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     }
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, instancedMatrices.size());
