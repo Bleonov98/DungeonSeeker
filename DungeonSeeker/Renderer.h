@@ -23,7 +23,7 @@ public:
 private:
 
 	unsigned int VAO, VBO;
-	unsigned int textureVBO, colourVBO, matBuffer;
+	unsigned int indexVBO, colourVBO, matBuffer;
 
 };
 

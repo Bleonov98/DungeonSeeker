@@ -1,19 +1,23 @@
-#version 400 core
+#version 430 core
 
 in vec2 TexCoords;
 in vec3 spriteColour;
-in flat int fragTexIndex;
+in flat uint fragTexIndex;
 out vec4 colour;
 
 uniform bool menu;
-uniform sampler2DArray image;
+uniform sampler2D image[32];
 
 uniform bool test;
 
 void main()
 {
-    if (menu) colour = vec4(spriteColour * 0.35f, 1.0) * texture(image, vec3(TexCoords, fragTexIndex));
-    else colour = vec4(spriteColour * 0.8f, 1.0) * texture(image, vec3(TexCoords, fragTexIndex));
+    for (uint i = 0; i < 32; i++) {
+        if (fragTexIndex == i) {
+                if (menu) colour = vec4(spriteColour * 0.35f, 1.0) * texture(image[i], TexCoords);
+                else colour = vec4(spriteColour * 0.8f, 1.0) * texture(image[i], TexCoords);
+        }
+    }
 
     if (test)
         colour = vec4(spriteColour, 1.0f);

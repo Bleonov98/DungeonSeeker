@@ -1,13 +1,13 @@
-#version 400 core
+#version 430 core
 
 layout (location = 0) in vec4 vertex;
-layout (location = 1) in int texIndex;
+layout (location = 1) in uint texIndex;
 layout (location = 2) in vec3 col;
 layout (location = 3) in mat4 iModel;
 
 out vec2 TexCoords;
 out vec3 spriteColour;
-out flat int fragTexIndex;
+out flat uint fragTexIndex;
 
 uniform bool instanced;
 

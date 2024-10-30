@@ -81,8 +81,8 @@ void Dungeon::GenerateRoom(DungeonNode* leaf)
 	halfX = std::round(leaf->width / 2);
 	halfY = std::round(leaf->height / 2);
 
-	randWidth = halfX + rand() % (halfX + static_cast<int>(halfX * 0.25f));
-	randHeight = halfY + rand() % (halfY + static_cast<int>(halfY * 0.25f));
+	randWidth = halfX + rand() % static_cast<int>(halfX * 0.5f);
+	randHeight = halfY + rand() % static_cast<int>(halfY * 0.5f);
 		
 	// for different dungeon sizes, delete when I've done
 	int percent = static_cast<int>(width * 0.02f);
@@ -180,7 +180,7 @@ void Dungeon::GenerateCorridor(Room* first, Room* second)
 
 	// DELETE
 	int minValue = static_cast<int>(width * 0.005f);
-	if (minValue < 1) minValue = 1;
+	if (minValue < 2) minValue = 2;
 
 	glm::vec2 dif = nearestPoints.second - nearestPoints.first;
 	int length = nearestPoints.second.x - nearestPoints.first.x;
@@ -191,7 +191,7 @@ void Dungeon::GenerateCorridor(Room* first, Room* second)
 		if (width <= 0 || width < length) width = minValue;
 		else if (length <= 0 || length < width) length = minValue;
 
-		Corridor cor(nearestPoints.first, length, width);
+		Corridor cor(nearestPoints.first, length + 1, width + 1);
 		corridors.push_back(cor);
 	}
 	else { // L shaped

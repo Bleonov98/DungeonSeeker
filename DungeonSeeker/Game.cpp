@@ -117,7 +117,7 @@ void Game::SetGrid()
         {
             for (size_t k = 0; k < dungeon->rooms[i].width; k++)
             {
-                grid[std::round(dungeon->rooms[i].position.y + j)][std::round(dungeon->rooms[i].position.x + k)]->data = MAINTILE;
+                grid[std::floor(dungeon->rooms[i].position.y) + j][std::floor(dungeon->rooms[i].position.x) + k]->data = MAINTILE;
             }
         }
     }
@@ -128,7 +128,7 @@ void Game::SetGrid()
         {
             for (size_t k = 0; k < dungeon->corridors[i].length; k++)
             {
-                grid[std::round(dungeon->corridors[i].position.y + j)][std::round(dungeon->corridors[i].position.x + k)]->data = MAINTILE;
+                grid[std::floor(dungeon->corridors[i].position.y) + j][std::floor(dungeon->corridors[i].position.x) + k]->data = MAINTILE;
             }
         }
     }
@@ -180,7 +180,7 @@ void Game::SetTile()
     {
         for (size_t j = 0; j < grid[i].size(); j++)
         {
-            if (grid[i][j]->data == MAINTILE) {
+            if (grid[i][j]->data != EMPTY) {
 
                 std::shared_ptr<MapObject> tile = std::make_shared<MapObject>(nameList[GetRandomNumber(0, nameList.size())], grid[i][j]->cellPosition, grid[i][j]->cellSize);
                 tile->textureID = ResourceManager::GetTexture(tile->textureName).GetID();
@@ -322,7 +322,7 @@ int Game::GetRandomNumber(int min, int max)
     int pseudoRandNum = 0;
     static int number = 0;
 
-    if (number > 14) {
+    if (number > 14 + rand() % 10) {
         number = 0;
         pseudoRandNum = min + rand() % (max - min);
     }

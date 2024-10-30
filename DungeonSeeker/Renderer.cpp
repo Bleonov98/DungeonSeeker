@@ -19,7 +19,7 @@ void Renderer::InitRenderData()
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &colourVBO);
     glGenBuffers(1, &matBuffer);
-    glGenBuffers(1, &textureVBO);
+    glGenBuffers(1, &indexVBO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -88,22 +88,22 @@ void Renderer::Draw(std::vector<glm::mat4> instancedMatrices, std::vector<glm::v
     }
 
     // make IDs for shader
-    std::vector<GLint> sTextureIDs; 
-    for (int i = 0; i < textureIDs.size(); i++)
+    std::vector<GLuint> sTextureIDs; 
+    for (size_t i = 0; i < textureIDs.size(); i++)
     {
-        for (int j = 0; j < uniqueID.size(); j++)
+        for (size_t j = 0; j < uniqueID.size(); j++)
         {
             if (textureIDs[i] == uniqueID[j]) sTextureIDs.push_back(j);
         }
     }
 
     // Refresh texture ID buffer
-    glBindBuffer(GL_ARRAY_BUFFER, textureVBO);
-    glBufferData(GL_ARRAY_BUFFER, sTextureIDs.size() * sizeof(int), sTextureIDs.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, indexVBO);
+    glBufferData(GL_ARRAY_BUFFER, sTextureIDs.size() * sizeof(GLuint), sTextureIDs.data(), GL_STATIC_DRAW);
 
     // IDs instructions
     glEnableVertexAttribArray(1);
-    glVertexAttribIPointer(1, 1, GL_INT, sizeof(GLint), (void*)0);
+    glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(GLuint), (void*)0);
     glVertexAttribDivisor(1, 1);
 
     // ------------------------------------------
@@ -139,8 +139,9 @@ void Renderer::Draw(std::vector<glm::mat4> instancedMatrices, std::vector<glm::v
 
     for (size_t i = 0; i < uniqueID.size(); i++)
     {
-        glBindTexture(GL_TEXTURE_2D_ARRAY, uniqueID[i]);
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, layers, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glUniform1i(glGetUniformLocation(shader.GetID(), ("image[" + std::to_string(i) + "]").c_str()), i);
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, uniqueID[i]);
     }
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, instancedMatrices.size());
