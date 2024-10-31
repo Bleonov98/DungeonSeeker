@@ -81,8 +81,8 @@ void Dungeon::GenerateRoom(DungeonNode* leaf)
 	halfX = std::round(leaf->width / 2);
 	halfY = std::round(leaf->height / 2);
 
-	randWidth = halfX + rand() % static_cast<int>(halfX * 0.5f);
-	randHeight = halfY + rand() % static_cast<int>(halfY * 0.5f);
+	randWidth = halfX + rand() % halfX;
+	randHeight = halfY + rand() % halfY;
 		
 	// for different dungeon sizes, delete when I've done
 	int percent = static_cast<int>(width * 0.02f);
@@ -177,42 +177,58 @@ std::optional<IntersectionResult> IntersectRays(glm::vec2 P1, glm::vec2 D1, glm:
 void Dungeon::GenerateCorridor(Room* first, Room* second)
 {
 	std::pair<glm::vec2, glm::vec2> nearestPoints = GetNearestPoints(first, second);
-
-	// DELETE
-	int minValue = static_cast<int>(width * 0.005f);
-	if (minValue < 2) minValue = 2;
-
 	glm::vec2 dif = nearestPoints.second - nearestPoints.first;
-	int length = nearestPoints.second.x - nearestPoints.first.x;
-	int width = nearestPoints.second.y - nearestPoints.first.y;
+	int size = 2;
 
-	if (dif.y == 0 || dif.x == 0) // straight corridor
+	int threshold1 = 4;
+	int threshold2 = 3;
+
+	if (dif.y == 0) // horizontal corridor
 	{
-		if (width <= 0 || width < length) width = minValue;
-		else if (length <= 0 || length < width) length = minValue;
-
-		Corridor cor(nearestPoints.first, length + 1, width + 1);
+		Corridor cor(nearestPoints.first, std::ceil(dif.x), size);
 		corridors.push_back(cor);
 	}
-	else { // L shaped
+	else if (dif.x == 0) { // vertical
+		Corridor cor(nearestPoints.first, size, std::ceil(dif.y));
+		corridors.push_back(cor);
+	}
+	else if (dif.x > dif.y && dif.x >= threshold1 && dif.y >= threshold2) { // vertical Z shape
+		Corridor cor(nearestPoints.first, std::ceil(dif.x / 2), size);
+		corridors.push_back(cor);
 
-		// direction vectors based on difference, dir1 - x, dir2 - y;
-		glm::vec2 dir1(glm::normalize(glm::vec2(length, 0.0f)));
-		glm::vec2 dir2(glm::normalize(glm::vec2(0.0f, width)));
+		Corridor cor1(nearestPoints.first + glm::vec2(std::ceil(dif.x / 2), 0), size, std::ceil(dif.y));
+		corridors.push_back(cor1);
 
-		// result - 2 surfaces intersection point
-		std::optional<IntersectionResult> result{ IntersectRays(nearestPoints.first, dir1, nearestPoints.second, dir2) }; // 1st case - first point (surface 1) direction goes by x, second goes by y;
-		
-		if (result) {
-			glm::vec2 corrP1 = nearestPoints.first;
-			if (result->point.x < nearestPoints.first.x) corrP1 = result->point; // define first corridor position that goes by x;
-			Corridor cor1(corrP1, std::abs(length + minValue), minValue);
+		Corridor cor2(nearestPoints.first + glm::vec2(std::ceil(dif.x / 2), std::ceil(dif.y)), std::ceil(dif.x / 2), size);
+		corridors.push_back(cor2);
+	}
+	else if (dif.y > dif.x && dif.y >= threshold1 && dif.x >= threshold2) { // horizontal Z shape
+		Corridor cor(nearestPoints.first, size, std::ceil(dif.y / 2));
+		corridors.push_back(cor);
+
+		Corridor cor1(nearestPoints.first + glm::vec2(0, std::ceil(dif.y / 2)), std::ceil(dif.x), size);
+		corridors.push_back(cor1);
+
+		Corridor cor2(glm::vec2(nearestPoints.second.x, nearestPoints.first.y + std::ceil(dif.y / 2)), size, std::ceil(dif.y / 2));
+		corridors.push_back(cor2);
+	}
+	else { // L shape
+		if (dif.y < 0) {
+			Corridor cor(nearestPoints.first + glm::vec2(0, std::ceil(dif.y)), size, std::abs(std::ceil(dif.y)));
+			corridors.push_back(cor);
+		}
+		else {
+			Corridor cor(nearestPoints.first, size, std::ceil(dif.y) + size);
+			corridors.push_back(cor);
+		}
+
+		if (dif.x < 0) {
+			Corridor cor1(glm::vec2(nearestPoints.first.x + std::ceil(dif.x), nearestPoints.second.y), std::abs(std::ceil(dif.x)), size);
 			corridors.push_back(cor1);
-
-			glm::vec2 corrP2 = result->point;
-			if (result->point.y > nearestPoints.second.y) corrP2 = nearestPoints.second; // second corridor position from the end of first to second point or vise versa
-			Corridor cor2(corrP2, minValue, std::abs(width));
-			corridors.push_back(cor2);
+		}
+		else {
+			Corridor cor1(glm::vec2(nearestPoints.first.x, nearestPoints.second.y), std::ceil(dif.x), size);
+			corridors.push_back(cor1);
 		}
 	}
 }

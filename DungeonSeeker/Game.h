@@ -107,6 +107,7 @@ private:
 	// map
 	std::vector<std::vector<std::shared_ptr<Grid>>> grid;
 	std::vector<std::shared_ptr<MapObject>> mainTileList;
+	std::vector<std::shared_ptr<GameObject>> mapObjList;
 
 	// objects
 	std::vector<std::shared_ptr<GameObject>> objList;

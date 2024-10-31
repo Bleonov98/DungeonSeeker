@@ -40,6 +40,16 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("../textures/map/main_tile_stone_0.png", true, "mainTileStone0");
     ResourceManager::LoadTexture("../textures/map/main_tile_stone_1.png", true, "mainTileStone1");
     ResourceManager::LoadTexture("../textures/map/main_tile_stone_2.png", true, "mainTileStone2");
+
+    ResourceManager::LoadTexture("../textures/map/top_tile.png", true, "topTile");
+    ResourceManager::LoadTexture("../textures/map/bot_tile.png", true, "botTile");
+    ResourceManager::LoadTexture("../textures/map/left_tile.png", true, "leftTile");
+    ResourceManager::LoadTexture("../textures/map/right_tile.png", true, "rightTile");
+
+    ResourceManager::LoadTexture("../textures/map/left_top_corner_tile.png", true, "leftTopTile");
+    ResourceManager::LoadTexture("../textures/map/right_top_corner_tile.png", true, "rightTopTile");
+    ResourceManager::LoadTexture("../textures/map/left_bot_corner_tile.png", true, "leftBotTile");
+    ResourceManager::LoadTexture("../textures/map/right_bot_corner_tile.png", true, "rightBotTile");
 }
 
 void Game::InitObjects()
@@ -124,9 +134,9 @@ void Game::SetGrid()
 
     for (size_t i = 0; i < dungeon->corridors.size(); i++)
     {
-        for (size_t j = 0; j < dungeon->corridors[i].width; j++)
+        for (int j = 0; j < dungeon->corridors[i].width; j++)
         {
-            for (size_t k = 0; k < dungeon->corridors[i].length; k++)
+            for (int k = 0; k < dungeon->corridors[i].length; k++)
             {
                 grid[std::floor(dungeon->corridors[i].position.y) + j][std::floor(dungeon->corridors[i].position.x) + k]->data = MAINTILE;
             }
@@ -141,29 +151,29 @@ void Game::SetGrid()
             // TOP SIDE
             if (grid[i][j]->data == MAINTILE && grid[i - 1][j]->data == EMPTY) 
             {
-                if (grid[i][j - 1]->data == EMPTY)
-                    grid[i][j]->data = CORNER_TOP_LEFT;
-                else if (grid[i][j + 1]->data == EMPTY)
-                    grid[i][j]->data = CORNER_TOP_RIGHT;
+                if (grid[i - 1][j - 1]->data == EMPTY)
+                    grid[i - 1][j - 1]->data = CORNER_TOP_LEFT;
+                else if (grid[i - 1][j + 1]->data == EMPTY)
+                    grid[i - 1][j + 1]->data = CORNER_TOP_RIGHT;
                 else
-                    grid[i][j]->data = TOP;
+                    grid[i - 1][j]->data = TOP;
             }
             // BOT SIDE
             else if (grid[i][j]->data == MAINTILE && grid[i + 1][j]->data == EMPTY) 
             {
-                if (grid[i][j - 1]->data == EMPTY)
-                    grid[i][j]->data = CORNER_BOT_LEFT;
-                else if (grid[i][j + 1]->data == EMPTY)
-                    grid[i][j]->data = CORNER_BOT_RIGHT;
+                if (grid[i + 1][j - 1]->data == EMPTY)
+                    grid[i + 1][j - 1]->data = CORNER_BOT_LEFT;
+                else if (grid[i + 1][j + 1]->data == EMPTY)
+                    grid[i + 1][j + 1]->data = CORNER_BOT_RIGHT;
                 else
-                    grid[i][j]->data = BOT;
+                    grid[i + 1][j]->data = BOT;
             }
             // RIGHT SIDE
             else if (grid[i][j]->data == MAINTILE && grid[i][j + 1]->data == EMPTY)
-                grid[i][j]->data = RIGHT;
+                grid[i][j + 1]->data = RIGHT;
             // LEFT SIDE
             else if (grid[i][j]->data == MAINTILE && grid[i][j - 1]->data == EMPTY)
-                grid[i][j]->data = LEFT;
+                grid[i][j - 1]->data = LEFT;
         }
     }
 }
@@ -180,11 +190,82 @@ void Game::SetTile()
     {
         for (size_t j = 0; j < grid[i].size(); j++)
         {
-            if (grid[i][j]->data != EMPTY) {
-
+            switch (grid[i][j]->data)
+            {
+            case MAINTILE: 
+            {
                 std::shared_ptr<MapObject> tile = std::make_shared<MapObject>(nameList[GetRandomNumber(0, nameList.size())], grid[i][j]->cellPosition, grid[i][j]->cellSize);
                 tile->textureID = ResourceManager::GetTexture(tile->textureName).GetID();
                 mainTileList.push_back(tile);
+            }
+            break;
+
+            case TOP: 
+            {
+                std::shared_ptr<GameObject> mapObj = std::make_shared<GameObject>(grid[i][j]->cellPosition, grid[i][j]->cellSize);
+                mapObj->SetTexture("topTile");
+                mapObjList.push_back(mapObj);
+            }
+            break;
+
+            case BOT:
+            {
+                std::shared_ptr<GameObject> mapObj = std::make_shared<GameObject>(grid[i][j]->cellPosition, grid[i][j]->cellSize);
+                mapObj->SetTexture("botTile");
+                mapObjList.push_back(mapObj);
+            }
+            break;
+
+            case LEFT:
+            {
+                std::shared_ptr<GameObject> mapObj = std::make_shared<GameObject>(grid[i][j]->cellPosition, grid[i][j]->cellSize);
+                mapObj->SetTexture("leftTile");
+                mapObjList.push_back(mapObj);
+            }
+            break;
+
+            case RIGHT:
+            {
+                std::shared_ptr<GameObject> mapObj = std::make_shared<GameObject>(grid[i][j]->cellPosition, grid[i][j]->cellSize);
+                mapObj->SetTexture("rightTile");
+                mapObjList.push_back(mapObj);
+            }
+            break;
+
+            case CORNER_TOP_LEFT:
+            {
+                std::shared_ptr<GameObject> mapObj = std::make_shared<GameObject>(grid[i][j]->cellPosition, grid[i][j]->cellSize);
+                mapObj->SetTexture("leftTopTile");
+                mapObjList.push_back(mapObj);
+            }
+            break;
+
+            case CORNER_TOP_RIGHT:
+            {
+                std::shared_ptr<GameObject> mapObj = std::make_shared<GameObject>(grid[i][j]->cellPosition, grid[i][j]->cellSize);
+                mapObj->SetTexture("rightTopTile");
+                mapObjList.push_back(mapObj);
+            }
+            break;
+
+            case CORNER_BOT_LEFT:
+            {
+                std::shared_ptr<GameObject> mapObj = std::make_shared<GameObject>(grid[i][j]->cellPosition, grid[i][j]->cellSize);
+                mapObj->SetTexture("leftBotTile");
+                mapObjList.push_back(mapObj);
+            }
+            break;
+
+            case CORNER_BOT_RIGHT:
+            {
+                std::shared_ptr<GameObject> mapObj = std::make_shared<GameObject>(grid[i][j]->cellPosition, grid[i][j]->cellSize);
+                mapObj->SetTexture("rightBotTile");
+                mapObjList.push_back(mapObj);
+            }
+            break;
+
+            default:
+                break;
             }
         }
     }
@@ -259,6 +340,7 @@ void Game::Render()
 {
     // background/map/stats
     DrawMapObject(mainTileList);
+    DrawObject(mapObjList);
 
 #ifdef _TESTING
     dungeon->DrawDungeon();
