@@ -34,6 +34,15 @@
     <ClCompile Include="Dungeon.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="DynamicObject.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Character.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h">
@@ -63,6 +72,15 @@
     <ClInclude Include="Dungeon.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="Character.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicObject.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\fShader.ft">
@@ -75,6 +93,12 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="..\shaders\vTxtShader.vx">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\menuVSHader.vx">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\menuFShader.ft">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

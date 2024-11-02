@@ -9,6 +9,7 @@
 #include "GameObject.h"
 
 #include "Dungeon.h"
+#include "Player.h"
 
 #include <memory>
 
@@ -37,7 +38,7 @@ struct Grid {
 public:
 	Grid(int data) : data(data) {};
 	int data;
-	glm::vec2 cellPosition, cellSize = glm::vec2(10.0f);
+	glm::vec2 cellPosition, cellSize = glm::vec2(50.0f);
 };
 
 struct MapObject {
@@ -49,6 +50,13 @@ public:
 	std::string textureName;
 	GLuint textureID;
 	glm::mat4 mapMat;
+};
+
+struct Camera {
+	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 1.0f);
+	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	float cameraSpeed = 250.0f; // delete after adding the player
 };
 
 class Game
@@ -69,6 +77,7 @@ public:
 	void Update(float dt);
 
 	// level generation
+	void GenerateDungeon();
 	void GenerateLevel();
 	void SetGrid();
 	void SetTile();
@@ -78,7 +87,9 @@ public:
 	void DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size);
 	void DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects);
 	template <typename T>
-	void DrawObject(std::vector<T*> objectVector);
+	void DrawObject(std::vector<std::shared_ptr<T>> objectVector); // vector of objects with instancing
+	template <typename T>
+	void DrawObject(std::shared_ptr<T> object); // single object without instancing
 	//void DrawStats();
 
 	void Menu();
@@ -89,7 +100,7 @@ public:
 
 	// utility
 	int GetRandomNumber(int min, int max);
-	
+
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], mouseKeys[8], mouseKeysProcessed[8], close = false;
 	float xMouse, yMouse;
@@ -98,7 +109,8 @@ public:
 
 private:
 
-	glm::mat4 projection;
+	Camera camera;
+	glm::mat4 projection, view = glm::mat4(1.0f);
 
 	// buttons
 	std::vector<std::shared_ptr<TextButton>> menuButtons;

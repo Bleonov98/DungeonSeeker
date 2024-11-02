@@ -71,13 +71,13 @@ void TextRenderer::Load(std::string font, unsigned int fontSize)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         // now store character for later use
-        Character character = {
+        Symbol character = {
             texture,
             glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
             glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
             face->glyph->advance.x
         };
-        Characters.insert(std::pair<char, Character>(c, character));
+        Characters.insert(std::pair<char, Symbol>(c, character));
     }
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -97,7 +97,7 @@ void TextRenderer::RenderText(std::string text, glm::vec2 position, float scale,
     std::string::const_iterator c;
     for (c = text.begin(); c != text.end(); c++)
     {
-        Character ch = Characters[*c];
+        Symbol ch = Characters[*c];
 
         float xpos = position.x + ch.Bearing.x * scale;
         float ypos = position.y + (this->Characters['H'].Bearing.y - ch.Bearing.y) * scale;
@@ -157,7 +157,7 @@ void TextButton::RenderButton(float scale)
     std::string::const_iterator c;
     for (c = text.begin(); c != text.end(); c++)
     {
-        Character ch = Characters[*c];
+        Symbol ch = Characters[*c];
 
         float xpos = pos.x + ch.Bearing.x * scale;
         float ypos = pos.y + (this->Characters['H'].Bearing.y - ch.Bearing.y) * scale;

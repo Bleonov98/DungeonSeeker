@@ -60,10 +60,7 @@ void Dungeon::SplitNode(DungeonNode* root, int step)
 
 	if (step == 0) {
 		GenerateRoom(root);
-		
-#ifdef _TESTING
 		rooms.push_back(*root->room);
-#endif
 		return;
 	}
 

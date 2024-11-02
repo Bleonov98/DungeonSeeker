@@ -8,6 +8,7 @@ ISoundEngine* sound = irrklang::createIrrKlangDevice();
 
 std::unique_ptr<Renderer> renderer;
 std::unique_ptr<Dungeon> dungeon;
+std::shared_ptr<Player> player;
 
 void Game::Init()
 {
@@ -18,10 +19,6 @@ void Game::Init()
     text = std::make_unique<TextRenderer>(this->width, this->height);
     text->Load("../fonts/Garamond.ttf", 24);
 
-    renderer = std::make_unique<Renderer>();
-
-    dungeon = std::make_unique<Dungeon>();
-
     InitObjects();
     InitTextButtons();
 }
@@ -29,6 +26,7 @@ void Game::Init()
 void Game::LoadResources()
 {
     ResourceManager::LoadShader("../shaders/vShader.vx", "../shaders/fShader.ft", "spriteShader");
+    ResourceManager::LoadShader("../shaders/menuVShader.vx", "../shaders/menuFShader.ft", "menuShader");
 
     // textures
     ResourceManager::LoadTexture("../textures/main/menu.png", true, "menuTexture");
@@ -50,11 +48,19 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("../textures/map/right_top_corner_tile.png", true, "rightTopTile");
     ResourceManager::LoadTexture("../textures/map/left_bot_corner_tile.png", true, "leftBotTile");
     ResourceManager::LoadTexture("../textures/map/right_bot_corner_tile.png", true, "rightBotTile");
+
+    // characters
+        // player
+    for (size_t i = 0; i < 4; i++)
+    {
+        ResourceManager::LoadTexture(("../textures/player/player_" + std::to_string(i) + ".png").c_str(), true, "player" + std::to_string(i));
+    }
 }
 
 void Game::InitObjects()
 {
-    GenerateLevel();
+    renderer = std::make_unique<Renderer>();
+    GenerateDungeon(); // player and dungeon generation
 }
 
 void Game::InitTextButtons()
@@ -107,6 +113,40 @@ void Game::Settings()
 }
 
 // level generation
+void Game::GenerateDungeon()
+{
+    dungeon = std::make_unique<Dungeon>();
+    GenerateLevel();
+    Grid cell(0); // for convenience
+
+    // find nearest room to start
+    float minValue = FLT_MAX;
+    glm::vec2 playerPos;
+    for (size_t i = 0; i < dungeon->rooms.size(); i++)
+    {
+        float distance = glm::distance(dungeon->rooms[i].position, glm::vec2(0, 0));
+        if (distance < minValue) {
+            minValue = distance;
+            playerPos = dungeon->rooms[i].position * cell.cellSize;
+        }
+    }
+    
+    // init player
+    player = std::make_shared<Player>(playerPos, cell.cellSize * 1.75f, 150.0f);
+    for (size_t i = 0; i < 4; i++)
+    {
+        player->SetTexture("player" + std::to_string(i));
+    }
+    objList.push_back(player);
+}
+
+void Game::GenerateLevel()
+{
+    dungeon->GenerateDungeon(width / 10.0f, height / 10.0f);
+    SetGrid();
+    SetTile();
+}
+
 void Game::SetGrid()
 {
     grid.resize(dungeon->GetHeight(), std::vector<std::shared_ptr<Grid>>(dungeon->GetWidth()));
@@ -149,24 +189,34 @@ void Game::SetGrid()
         {
             // define tiletype
             // TOP SIDE
+            if (i == 1 && grid[i - 1][j]->data == MAINTILE) grid[i - 1][j]->data = TOP; // here mb smth else - to think !!!!!!!!!!!!!
+
             if (grid[i][j]->data == MAINTILE && grid[i - 1][j]->data == EMPTY) 
             {
-                if (grid[i - 1][j - 1]->data == EMPTY)
+                grid[i - 1][j]->data = TOP;
+
+                if (grid[i][j - 1]->data == EMPTY) {
                     grid[i - 1][j - 1]->data = CORNER_TOP_LEFT;
-                else if (grid[i - 1][j + 1]->data == EMPTY)
+                    grid[i][j - 1]->data = LEFT;
+                }
+                else if (grid[i][j + 1]->data == EMPTY) {
                     grid[i - 1][j + 1]->data = CORNER_TOP_RIGHT;
-                else
-                    grid[i - 1][j]->data = TOP;
+                    grid[i][j + 1]->data = RIGHT;
+                }
             }
             // BOT SIDE
             else if (grid[i][j]->data == MAINTILE && grid[i + 1][j]->data == EMPTY) 
             {
-                if (grid[i + 1][j - 1]->data == EMPTY)
+                grid[i + 1][j]->data = BOT;
+
+                if (grid[i][j - 1]->data == EMPTY) {
                     grid[i + 1][j - 1]->data = CORNER_BOT_LEFT;
-                else if (grid[i + 1][j + 1]->data == EMPTY)
+                    grid[i][j - 1]->data = LEFT;
+                }
+                else if (grid[i][j + 1]->data == EMPTY) {
                     grid[i + 1][j + 1]->data = CORNER_BOT_RIGHT;
-                else
-                    grid[i + 1][j]->data = BOT;
+                    grid[i][j + 1]->data = RIGHT;
+                }
             }
             // RIGHT SIDE
             else if (grid[i][j]->data == MAINTILE && grid[i][j + 1]->data == EMPTY)
@@ -174,6 +224,28 @@ void Game::SetGrid()
             // LEFT SIDE
             else if (grid[i][j]->data == MAINTILE && grid[i][j - 1]->data == EMPTY)
                 grid[i][j - 1]->data = LEFT;
+        }
+    }
+
+    for (size_t i = 1; i < grid.size() - 1; i++)
+    {
+        for (size_t j = 1; j < grid[i].size() - 1; j++)
+        {
+            // corrections
+            if (grid[i][j]->data == EMPTY) {
+                if (grid[i - 1][j]->data != EMPTY && grid[i][j + 1]->data != EMPTY) {
+                    grid[i - 1][j + 1]->data = CORNER_TOP_RIGHT;
+                }
+                else if (grid[i - 1][j]->data != EMPTY && grid[i][j - 1]->data != EMPTY) {
+                    grid[i - 1][j - 1]->data = CORNER_TOP_LEFT;
+                }
+                else if (grid[i + 1][j]->data != EMPTY && grid[i][j + 1]->data != EMPTY) {
+                    grid[i + 1][j + 1]->data = CORNER_BOT_RIGHT;
+                }
+                else if (grid[i + 1][j]->data != EMPTY && grid[i][j - 1]->data != EMPTY) {
+                    grid[i + 1][j - 1]->data = CORNER_BOT_LEFT;
+                }
+            }
         }
     }
 }
@@ -271,13 +343,6 @@ void Game::SetTile()
     }
 }
 
-void Game::GenerateLevel()
-{
-    dungeon->GenerateDungeon(width / 10.0f, height / 10.0f);
-    SetGrid();
-    SetTile();
-}
-
 // main
 void Game::ProcessInput(float dt)
 {
@@ -289,7 +354,17 @@ void Game::ProcessInput(float dt)
     }
 
     if (gmState == ACTIVE) {
-        
+        // Move screen
+        float midScreenX = player->GetPos().x - this->width / 2.0f + player->GetSize().x / 2.0f;
+        float midScreenY = player->GetPos().y - this->height / 2.0f + player->GetSize().y / 2.0f;
+        camera.cameraPos = glm::vec3(midScreenX, midScreenY, 1.0f);
+        if (camera.cameraPos.x < 0.0f) camera.cameraPos.x = 0.0f;
+        if (camera.cameraPos.y < 0.0f) camera.cameraPos.y = 0.0f;
+ 
+        if (Keys[GLFW_KEY_W]) player->Move(DIR_UP, dt);
+        else if (Keys[GLFW_KEY_S]) player->Move(DIR_DOWN, dt);
+        if (Keys[GLFW_KEY_A]) player->Move(DIR_LEFT, dt);
+        else if (Keys[GLFW_KEY_D]) player->Move(DIR_RIGHT, dt);
     }
     else if (gmState == MENU) {
         for (auto i : menuButtons)
@@ -322,7 +397,6 @@ void Game::ProcessInput(float dt)
 void Game::Update(float dt)
 {
     if (gmState == ACTIVE) {
-
         // actions
 
         // update borders after position changes
@@ -335,12 +409,34 @@ void Game::Update(float dt)
     }
 }
 
+// utility
+int Game::GetRandomNumber(int min, int max)
+{
+    int pseudoRandNum = 0;
+    static int number = 0;
+
+    if (number > 14 + rand() % 10) {
+        number = 0;
+        pseudoRandNum = min + rand() % (max - min);
+    }
+    else {
+        pseudoRandNum = min;
+    }
+
+    number++;
+    return pseudoRandNum;
+}
+
 // render
 void Game::Render()
 {
+    view = glm::lookAt(camera.cameraPos, camera.cameraPos + camera.cameraFront, camera.cameraUp);
+
     // background/map/stats
     DrawMapObject(mainTileList);
     DrawObject(mapObjList);
+
+    DrawObject(player);
 
 #ifdef _TESTING
     dungeon->DrawDungeon();
@@ -349,28 +445,19 @@ void Game::Render()
     if (gmState == MENU) Menu();
     else if (gmState == SETTINGS) Settings();
 
-    DrawTexture(ResourceManager::GetTexture("cursorTexture"), glm::vec2(xMouse, yMouse), glm::vec2(30.0f, 32.0f));
+    if (gmState != ACTIVE) DrawTexture(ResourceManager::GetTexture("cursorTexture"), glm::vec2(xMouse, yMouse), glm::vec2(30.0f, 32.0f));
 }
 
 void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size)
 {
-    ResourceManager::GetShader("spriteShader").Use();
-    ResourceManager::GetShader("spriteShader").SetMatrix4("projection", projection);
-    ResourceManager::GetShader("spriteShader").SetVector3f("uColour", glm::vec3(1.0f));
-
-    ResourceManager::GetShader("spriteShader").SetBool("menu", false);
-    ResourceManager::GetShader("spriteShader").SetBool("instanced", false);
+    ResourceManager::GetShader("menuShader").Use();
+    ResourceManager::GetShader("menuShader").SetMatrix4("projection", projection);
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(position, 0.0f));
     model = glm::scale(model, glm::vec3(size, 0.0f));
 
-    ResourceManager::GetShader("spriteShader").SetMatrix4("uModel", model);
-
-#ifdef _TESTING
-    ResourceManager::GetShader("spriteShader").SetBool("test", false);
-#endif
-
+    ResourceManager::GetShader("menuShader").SetMatrix4("model", model);
     renderer->DrawTexture(texture);
 }
 
@@ -378,6 +465,7 @@ void Game::DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects)
 {
     ResourceManager::GetShader("spriteShader").Use();
     ResourceManager::GetShader("spriteShader").SetMatrix4("projection", projection);
+    ResourceManager::GetShader("spriteShader").SetMatrix4("view", view);
 
     std::vector<glm::mat4> instMat;
     std::vector<glm::vec3> instCol(objects.size(), glm::vec3(1.0f));
@@ -399,37 +487,23 @@ void Game::DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects)
     renderer->Draw(instMat, instCol, textureIDs);
 }
 
-int Game::GetRandomNumber(int min, int max)
-{
-    int pseudoRandNum = 0;
-    static int number = 0;
-
-    if (number > 14 + rand() % 10) {
-        number = 0;
-        pseudoRandNum = min + rand() % (max - min);
-    }
-    else {
-        pseudoRandNum = min;
-    }
-
-    number++;
-    return pseudoRandNum;
-}
-
 template <typename T>
-void Game::DrawObject(std::vector<T*> objectVector)
+void Game::DrawObject(std::vector<std::shared_ptr<T>> objectVector)
 {
     ResourceManager::GetShader("spriteShader").Use();
     ResourceManager::GetShader("spriteShader").SetMatrix4("projection", projection);
+    ResourceManager::GetShader("spriteShader").SetMatrix4("view", view);
 
     std::vector<glm::mat4> instMat;
     std::vector<glm::vec3> instCol;
+    std::vector<GLuint> textureIDs;
 
     for (auto i : objectVector)
     {
         i->RefreshMatrix();
         instMat.push_back(i->GetMatrix());
         instCol.push_back(i->GetColour());
+        textureIDs.push_back(ResourceManager::GetTexture(i->GetTextureName()).GetID());
     }
 
     ResourceManager::GetShader("spriteShader").SetBool("instanced", true);
@@ -437,7 +511,27 @@ void Game::DrawObject(std::vector<T*> objectVector)
     if (gmState != ACTIVE) ResourceManager::GetShader("spriteShader").SetBool("menu", true);
     else ResourceManager::GetShader("spriteShader").SetBool("menu", false);
 
-    renderer->Draw(ResourceManager::GetTexture(objectVector[0].GetTextureName()), instMat, instCol);
+    renderer->Draw(instMat, instCol, textureIDs);
+}
+
+template <typename T>
+void Game::DrawObject(std::shared_ptr<T> object)
+{
+    ResourceManager::GetShader("spriteShader").Use();
+    ResourceManager::GetShader("spriteShader").SetMatrix4("projection", projection);
+    ResourceManager::GetShader("spriteShader").SetMatrix4("view", view);
+
+    //
+    object->RefreshMatrix();
+    ResourceManager::GetShader("spriteShader").SetMatrix4("uModel", object->GetMatrix());
+    ResourceManager::GetShader("spriteShader").SetVector3f("uColour", object->GetColour());
+
+    //
+    ResourceManager::GetShader("spriteShader").SetBool("instanced", false);
+    if (gmState != ACTIVE) ResourceManager::GetShader("spriteShader").SetBool("menu", true);
+    else ResourceManager::GetShader("spriteShader").SetBool("menu", false);
+    
+    renderer->DrawTexture(ResourceManager::GetTexture(object->GetTextureName()));
 }
 
 Game::~Game()

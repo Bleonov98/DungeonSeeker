@@ -7,7 +7,7 @@
 #include "ResourceManager.h"
 #include <functional>
 
-struct Character {
+struct Symbol {
     unsigned int TextureID; // ID handle of the glyph texture
     glm::ivec2   Size;      // size of glyph
     glm::ivec2   Bearing;   // offset from baseline to left/top of glyph
@@ -26,7 +26,7 @@ public:
 
 protected:
 
-    std::map<char, Character> Characters;
+    std::map<char, Symbol> Characters;
 
     unsigned int VAO, VBO;
 };

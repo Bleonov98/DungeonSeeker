@@ -22,7 +22,7 @@ public:
 	void SetAngle(float angle) { this->angle = angle; }
 	void RefreshMatrix();
 
-	void SetTexture(std::string name) { textureName = name; }
+	void SetTexture(std::string name) { textures.push_back(name); }
 	virtual void UpdateAABB() { hBox.SetBorder(position, position + size); }
 
 	// Get
@@ -31,7 +31,7 @@ public:
 	glm::vec2 GetSize() { return size; }
 	glm::vec3 GetColour() { return colour; }
 	float GetAngle() { return angle; }
-	std::string GetTextureName() { return textureName; }
+	std::string GetTextureName() { return textures[activeTex]; }
 
 	// collisions
 	bool PointCollision(const glm::vec2 point) { return hBox.IntersectPoint(point); }
@@ -48,7 +48,9 @@ public:
 
 protected:
 
-	std::string textureName;
+	std::vector<std::string> textures;
+	GLuint activeTex = 0;
+
 	AABB hBox;
 
 	glm::mat4 objectMatrix;
