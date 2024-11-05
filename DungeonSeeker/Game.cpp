@@ -54,13 +54,25 @@ void Game::LoadResources()
     for (size_t i = 0; i < 4; i++)
     {
         ResourceManager::LoadTexture(("../textures/player/player_" + std::to_string(i) + ".png").c_str(), true, "player" + std::to_string(i));
+        ResourceManager::LoadTexture(("../textures/player/player_left_" + std::to_string(i) + ".png").c_str(), true, "playerLeft" + std::to_string(i));
     }
 }
 
 void Game::InitObjects()
 {
     renderer = std::make_unique<Renderer>();
-    GenerateDungeon(); // player and dungeon generation
+
+    Grid cell(0); // for convenience
+    player = std::make_shared<Player>(glm::vec2(0, 0), cell.cellSize * 1.75f, 175.0f);
+    // init player
+    for (size_t i = 0; i < 4; i++)
+    {
+        player->SetTexture("player" + std::to_string(i));
+        player->SetTexture("playerLeft" + std::to_string(i));
+    }
+    objList.push_back(player);
+    
+    GenerateDungeon();
 }
 
 void Game::InitTextButtons()
@@ -130,14 +142,7 @@ void Game::GenerateDungeon()
             playerPos = dungeon->rooms[i].position * cell.cellSize;
         }
     }
-    
-    // init player
-    player = std::make_shared<Player>(playerPos, cell.cellSize * 1.75f, 150.0f);
-    for (size_t i = 0; i < 4; i++)
-    {
-        player->SetTexture("player" + std::to_string(i));
-    }
-    objList.push_back(player);
+    player->SetPos(playerPos);
 }
 
 void Game::GenerateLevel()
@@ -398,6 +403,7 @@ void Game::Update(float dt)
 {
     if (gmState == ACTIVE) {
         // actions
+        UpdateAnimations(dt);
 
         // update borders after position changes
         for (auto i : objList)
@@ -406,7 +412,26 @@ void Game::Update(float dt)
         }
 
         // interactions
+        ProcessCollisions(dt);
     }
+}
+
+void Game::UpdateAnimations(float dt)
+{ 
+    if (player->AnimationPlayed(dt)) player->PlayAnimation();
+}
+
+void Game::ProcessCollisions(float dt)
+{
+    // player collisions
+        // map collision
+    for (size_t i = 0; i < mapObjList.size(); i++)
+    {
+        if (i == 0) player->ProcessCollision((*mapObjList[i]), true, dt); // bool prevents double collision
+        else player->ProcessCollision((*mapObjList[i]), false, dt);
+        
+    }
+        // another collision
 }
 
 // utility

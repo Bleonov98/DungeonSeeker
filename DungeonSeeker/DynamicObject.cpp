@@ -9,7 +9,3 @@ bool DynamicObject::AnimationPlayed(float dt)
 	}
 	return false;
 }
-bool DynamicObject::ProcessCollision(GameObject& two)
-{
-	return false;
-}

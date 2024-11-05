@@ -13,11 +13,6 @@ public:
             min.y <= other.max.y && max.y >= other.min.y);
     }
 
-    bool IntersectMap(const glm::vec2 mapPos, const glm::vec2 mapSize) const {
-        return (min.x <= mapPos.x + mapSize.x && max.x >= mapPos.x &&
-            min.y <= mapPos.y + mapSize.y && max.y >= mapPos.y);
-    }
-
     bool IntersectPoint(const glm::vec2 point) const {
         return (min.x <= point.x && max.x >= point.x &&
             min.y <= point.y && max.y >= point.y);
@@ -46,11 +41,13 @@ public:
     }
 
     // update
-
     void SetBorder(const glm::vec2& newMin, const glm::vec2& newMax) {
         min = newMin;
         max = newMax;
     }
+
+    glm::vec2 GetMin() { return this->min; }
+    glm::vec2 GetMax() { return this->max; }
 
 private:
     glm::vec2 min;

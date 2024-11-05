@@ -75,6 +75,8 @@ public:
 
 	void ProcessInput(float dt);
 	void Update(float dt);
+	void UpdateAnimations(float dt);
+	void ProcessCollisions(float dt);
 
 	// level generation
 	void GenerateDungeon();
