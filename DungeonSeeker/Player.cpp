@@ -15,11 +15,11 @@ void Player::Move(MoveDirection dir, float dt)
 		position.y += speed * dt;
 		break;
 	case DIR_LEFT:
-		if (lastTextureDir != dir) activeTex = 1;
+		if (lastTextureDir != dir) flipHorizontally = true;
 		position.x -= speed * dt;
 		break;
 	case DIR_RIGHT:
-		if (lastTextureDir != dir) activeTex = 0;
+		if (lastTextureDir != dir) flipHorizontally = false;
 		position.x += speed * dt;
 		break;
 	default:
@@ -27,17 +27,6 @@ void Player::Move(MoveDirection dir, float dt)
 	}
 
 	if (dir == DIR_LEFT || dir == DIR_RIGHT) lastTextureDir = dir;
-}
-
-void Player::PlayAnimation()
-{
-	activeTex += 2;
-	if (activeTex == textures.size()) activeTex = 0;
-	else if (activeTex == textures.size() + 1) activeTex = 1;
-}
-
-void Player::Hit()
-{
 }
 
 void Player::UpdateAABB()

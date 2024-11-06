@@ -3,17 +3,28 @@
 
 #include "DynamicObject.h"
 
+enum AttackType {
+	PHYSICAL,
+	MAGICAL,
+	PURE
+};
+
 class Character : public DynamicObject
 {
 public:
-	Character(glm::vec2 position, glm::vec2 size, float speed = 0.0f) : DynamicObject(position, size, speed) {
+	Character(glm::vec2 position, glm::vec2 size, float speed) : DynamicObject(position, size, speed) {
 		this->speed = speed;
 	};
 
-	virtual void PlayAnimation() = 0;
-
+	// basic
+	void PlayAnimation();
 	bool ProcessCollision(GameObject& other, bool first, float dt);
 
+	//
+	void Hit(float damage, AttackType type);
+
+	// 
+	int GetDamage() { return this->damage; }
 	float GetSpeed() { return speed; }
 
 	void Death() { this->isDead = true; }
@@ -21,7 +32,8 @@ public:
 
 protected:
 
-	float speed;
+	AttackType attackType = PHYSICAL;
+	float speed, damage, armor, resist, hp; // resist - magic resistance
 	bool isDead = false;
 
 };

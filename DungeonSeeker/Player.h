@@ -5,13 +5,14 @@
 class Player : public Character
 {
 public:
-	Player(glm::vec2 position, glm::vec2 size, float speed = 10.0f) : Character(position, size, speed) {
+	Player(glm::vec2 position, glm::vec2 size, float speed) : Character(position, size, speed) {
 		swapTime = 0.35f;
+		damage = 10;
+		armor = 1.5f;
+		resist = 1.5f;
 	};
 
 	void Move(MoveDirection dir, float dt);
-	void PlayAnimation() override;
-	void Hit();
 
 	void UpdateAABB() override;
 

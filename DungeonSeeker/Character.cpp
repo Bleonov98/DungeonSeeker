@@ -1,5 +1,11 @@
 #include "Character.h"
 
+void Character::PlayAnimation()
+{
+    activeTex++;
+    if (activeTex == textures.size()) activeTex = 0;
+}
+
 bool Character::ProcessCollision(GameObject& other, bool first, float dt)
 {
     // to prevent double collision for the same side
@@ -29,4 +35,13 @@ bool Character::ProcessCollision(GameObject& other, bool first, float dt)
     else return false;
 
     return true;
+}
+
+void Character::Hit(float damage, AttackType type)
+{
+    if (type == PHYSICAL)
+        hp -= damage - armor;
+    else if (type == MAGICAL)
+        hp -= damage - resist;
+    else hp -= damage;
 }

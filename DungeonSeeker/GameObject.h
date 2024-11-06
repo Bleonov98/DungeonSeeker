@@ -56,6 +56,7 @@ protected:
 	glm::mat4 objectMatrix;
 	glm::vec3 colour;
 	glm::vec2 position, size;
+	bool flipHorizontally = false;
 	float angle;
 
 };

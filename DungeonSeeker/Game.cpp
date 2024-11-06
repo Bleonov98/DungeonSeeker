@@ -54,7 +54,21 @@ void Game::LoadResources()
     for (size_t i = 0; i < 4; i++)
     {
         ResourceManager::LoadTexture(("../textures/player/player_" + std::to_string(i) + ".png").c_str(), true, "player" + std::to_string(i));
-        ResourceManager::LoadTexture(("../textures/player/player_left_" + std::to_string(i) + ".png").c_str(), true, "playerLeft" + std::to_string(i));
+    }
+        // skeleton
+    for (size_t i = 0; i < 4; i++)
+    {
+        ResourceManager::LoadTexture(("../textures/enemies/skeleton/skeleton_" + std::to_string(i) + ".png").c_str(), true, "skeleton" + std::to_string(i));
+    }      
+        // skull
+    for (size_t i = 0; i < 4; i++)
+    {
+        ResourceManager::LoadTexture(("../textures/enemies/skull/skull_" + std::to_string(i) + ".png").c_str(), true, "skull" + std::to_string(i));
+    }
+        // vampire
+    for (size_t i = 0; i < 4; i++)
+    {
+        ResourceManager::LoadTexture(("../textures/enemies/vamp/vamp_" + std::to_string(i) + ".png").c_str(), true, "vamp" + std::to_string(i));
     }
 }
 
@@ -68,7 +82,6 @@ void Game::InitObjects()
     for (size_t i = 0; i < 4; i++)
     {
         player->SetTexture("player" + std::to_string(i));
-        player->SetTexture("playerLeft" + std::to_string(i));
     }
     objList.push_back(player);
     
@@ -473,7 +486,7 @@ void Game::Render()
     if (gmState != ACTIVE) DrawTexture(ResourceManager::GetTexture("cursorTexture"), glm::vec2(xMouse, yMouse), glm::vec2(30.0f, 32.0f));
 }
 
-void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size)
+void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size) // menu texture
 {
     ResourceManager::GetShader("menuShader").Use();
     ResourceManager::GetShader("menuShader").SetMatrix4("projection", projection);
@@ -484,7 +497,7 @@ void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size)
 
     ResourceManager::GetShader("menuShader").SetMatrix4("model", model);
     renderer->DrawTexture(texture);
-}
+} 
 
 void Game::DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects)
 {

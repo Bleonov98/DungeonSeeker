@@ -65,6 +65,7 @@ int main() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        if (deltaTime > 0.016f) deltaTime = 0.016f;
         // updating
         DungeonSeeker.ProcessInput(deltaTime);
         DungeonSeeker.Update(deltaTime);
