@@ -125,6 +125,9 @@ private:
 
 	// objects
 	std::vector<std::shared_ptr<GameObject>> objList;
+	std::vector<std::shared_ptr<DynamicObject>> animObjList;
+
+	std::vector<std::shared_ptr<Enemy>> enemyList;
 
 		// - - - some type
 

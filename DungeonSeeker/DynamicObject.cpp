@@ -1,11 +1,18 @@
 #include "DynamicObject.h"
 
-bool DynamicObject::AnimationPlayed(float dt)
+void DynamicObject::AddAnimation(std::string animationName, unsigned int startIndex, unsigned int totalFrames, float swapTime, bool setActive)
 {
-	animationTime += dt;
-	if (animationTime >= swapTime) {
-		animationTime = 0.0f;
-		return true;
-	}
-	return false;
+    Animation animation(startIndex, totalFrames, swapTime);
+    animations.emplace(animationName, animation);
+    if (setActive) currentAnimationName = animationName;
+}
+
+void DynamicObject::PlayAnimation(float dt)
+{
+    if (animator.AnimationPlayed(animations[currentAnimationName], dt)) {
+        unsigned int maxIndex = animations[currentAnimationName].startIndex + animations[currentAnimationName].totalFrames;
+        if (animations[currentAnimationName].currentIndex == maxIndex) animations[currentAnimationName].currentIndex = animations[currentAnimationName].startIndex;
+        activeTex = animations[currentAnimationName].currentIndex;
+        animations[currentAnimationName].currentIndex++;
+    }
 }

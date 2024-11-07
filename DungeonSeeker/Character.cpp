@@ -1,11 +1,5 @@
 #include "Character.h"
 
-void Character::PlayAnimation()
-{
-    activeTex++;
-    if (activeTex == textures.size()) activeTex = 0;
-}
-
 bool Character::ProcessCollision(GameObject& other, bool first, float dt)
 {
     // to prevent double collision for the same side

@@ -55,6 +55,10 @@ void Game::LoadResources()
     {
         ResourceManager::LoadTexture(("../textures/player/player_" + std::to_string(i) + ".png").c_str(), true, "player" + std::to_string(i));
     }
+    for (size_t i = 0; i < 3; i++)
+    {
+        ResourceManager::LoadTexture(("../textures/player/player_attack_" + std::to_string(i) + ".png").c_str(), true, "playerAttack" + std::to_string(i));
+    }
         // skeleton
     for (size_t i = 0; i < 4; i++)
     {
@@ -77,14 +81,26 @@ void Game::InitObjects()
     renderer = std::make_unique<Renderer>();
 
     Grid cell(0); // for convenience
+
+    // PLAYER INITIALIZATION
     player = std::make_shared<Player>(glm::vec2(0, 0), cell.cellSize * 1.75f, 175.0f);
-    // init player
+        // walking-stand textures + animation
     for (size_t i = 0; i < 4; i++)
     {
         player->SetTexture("player" + std::to_string(i));
     }
+    player->AddAnimation("main", 0, 4, 0.4f, true);
+        // attack textures + animations
+    for (size_t i = 0; i < 3; i++)
+    {
+        player->SetTexture("playerAttack" + std::to_string(i));
+    }
+    player->AddAnimation("attack", 4, 3, 0.15f);
+
     objList.push_back(player);
-    
+    animObjList.push_back(player);
+    // - - - - - - - - - - - - - - - - - -
+
     GenerateDungeon();
 }
 
@@ -379,10 +395,20 @@ void Game::ProcessInput(float dt)
         if (camera.cameraPos.x < 0.0f) camera.cameraPos.x = 0.0f;
         if (camera.cameraPos.y < 0.0f) camera.cameraPos.y = 0.0f;
  
-        if (Keys[GLFW_KEY_W]) player->Move(DIR_UP, dt);
-        else if (Keys[GLFW_KEY_S]) player->Move(DIR_DOWN, dt);
-        if (Keys[GLFW_KEY_A]) player->Move(DIR_LEFT, dt);
-        else if (Keys[GLFW_KEY_D]) player->Move(DIR_RIGHT, dt);
+        if (Keys[GLFW_KEY_W]) 
+            player->Move(DIR_UP, dt);
+        else if (Keys[GLFW_KEY_S]) 
+            player->Move(DIR_DOWN, dt);
+
+        if (Keys[GLFW_KEY_A]) 
+            player->Move(DIR_LEFT, dt);
+        else if (Keys[GLFW_KEY_D]) 
+            player->Move(DIR_RIGHT, dt);
+
+        if (mouseKeys[GLFW_MOUSE_BUTTON_LEFT] && !mouseKeysProcessed[GLFW_MOUSE_BUTTON_LEFT]) {
+            player->Attack();
+            mouseKeysProcessed[GLFW_MOUSE_BUTTON_LEFT] = true;
+        }
     }
     else if (gmState == MENU) {
         for (auto i : menuButtons)
@@ -418,6 +444,8 @@ void Game::Update(float dt)
         // actions
         UpdateAnimations(dt);
 
+        player->ProcessAction(dt);
+
         // update borders after position changes
         for (auto i : objList)
         {
@@ -431,7 +459,11 @@ void Game::Update(float dt)
 
 void Game::UpdateAnimations(float dt)
 { 
-    if (player->AnimationPlayed(dt)) player->PlayAnimation();
+    for (size_t i = 0; i < animObjList.size(); i++)
+    {
+        animObjList[i]->PlayAnimation(dt);
+    }
+
 }
 
 void Game::ProcessCollisions(float dt)
@@ -444,7 +476,14 @@ void Game::ProcessCollisions(float dt)
         else player->ProcessCollision((*mapObjList[i]), false, dt);
         
     }
-        // another collision
+        // attack collision
+    if (player->GetAction() == ATTACK) {
+        for (size_t i = 0; i < enemyList.size(); i++)
+        {
+            player->AttackCollision(enemyList[i]);
+        }
+    }
+
 }
 
 // utility

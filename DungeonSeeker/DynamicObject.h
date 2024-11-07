@@ -3,6 +3,9 @@
 
 #include "GameObject.h"
 #include "ResourceManager.h"
+#include "Animator.h"
+
+#include <unordered_map>
 
 enum MoveDirection {
 	STAND,
@@ -18,11 +21,12 @@ public:
 
 	DynamicObject(glm::vec2 position, glm::vec2 size, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : GameObject(position, size, angle, color) {};
 
-	virtual void PlayAnimation() = 0;
-	bool AnimationPlayed(float dt);
+	// animations
+	void AddAnimation(std::string animationName, unsigned int startIndex, unsigned int totalFrames, float swapTime, bool setActive = false);
+	void PlayAnimation(float dt);
 
+	// movement
 	MoveDirection GetDirection() { return direction; }
-	
 	void SetDirection(MoveDirection direction) { this->direction = direction; }
 
 	virtual ~DynamicObject() {}
@@ -30,9 +34,10 @@ public:
 protected:
 
 	MoveDirection direction = STAND;
-	float animationTime = 0.0f, swapTime = 0.4f;
-	int frame = 0;
-	bool animToggle = false;
+	Animator animator;
+	std::unordered_map<std::string, Animation> animations;
+	std::string currentAnimationName;
+
 };
 
 #endif // !DYNAMIC_H

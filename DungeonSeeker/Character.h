@@ -17,7 +17,6 @@ public:
 	};
 
 	// basic
-	void PlayAnimation();
 	bool ProcessCollision(GameObject& other, bool first, float dt);
 
 	//
