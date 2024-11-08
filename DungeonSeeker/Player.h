@@ -1,11 +1,6 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-enum ActionState {
-	IDLE,
-	ATTACK
-};
-
 #include "Character.h"
 #include "Enemy.h"
 
@@ -34,8 +29,6 @@ private:
 	// attack
 	AABB daggerhBox;
 	float attackDuration = 0.45f, attackTimer = 0.0f;
-	
-	ActionState aState = IDLE;
 
 };
 

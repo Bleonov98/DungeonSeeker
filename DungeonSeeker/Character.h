@@ -9,6 +9,11 @@ enum AttackType {
 	PURE
 };
 
+enum ActionState {
+	IDLE,
+	ATTACK
+};
+
 class Character : public DynamicObject
 {
 public:
@@ -26,12 +31,14 @@ public:
 	int GetDamage() { return this->damage; }
 	float GetSpeed() { return speed; }
 
+	//
 	void Death() { this->isDead = true; }
 	bool IsDead() { return this->isDead; }	
 
 protected:
 
 	AttackType attackType = PHYSICAL;
+	ActionState aState = IDLE;
 	float speed, damage, armor, resist, hp; // resist - magic resistance
 	bool isDead = false;
 

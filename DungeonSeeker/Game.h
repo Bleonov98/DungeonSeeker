@@ -17,6 +17,7 @@
 enum TileType {
 	EMPTY,
 	MAINTILE,
+	MAINTILE_USED,
 	TOP,
 	RIGHT,
 	BOT,
@@ -99,6 +100,7 @@ public:
 	//void Restart();
 
 	// game
+	void SpawnEnemy();
 
 	// utility
 	int GetRandomNumber(int min, int max);

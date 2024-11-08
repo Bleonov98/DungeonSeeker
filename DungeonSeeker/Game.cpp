@@ -179,6 +179,13 @@ void Game::GenerateLevel()
     dungeon->GenerateDungeon(width / 10.0f, height / 10.0f);
     SetGrid();
     SetTile();
+
+    // enemies
+    int eCnt = 6 + rand() % 4;
+    for (size_t i = 0; i < eCnt; i++)
+    {
+        SpawnEnemy();
+    }
 }
 
 void Game::SetGrid()
@@ -504,6 +511,64 @@ int Game::GetRandomNumber(int min, int max)
     return pseudoRandNum;
 }
 
+void Game::SpawnEnemy()
+{
+    enum EnemyType {
+        SKELETON = 0,
+        SKULL,
+        PRIEST
+    };
+    EnemyType type = static_cast<EnemyType>(rand() % (PRIEST + 1));
+
+    // random place
+    glm::vec2 enemyPos;
+    while (true)
+    {
+        int row = rand() % grid.size(), col = rand() % grid[0].size();
+        if (grid[row][col]->data == MAINTILE) {
+            enemyPos = grid[row][col]->cellPosition + grid[row][col]->cellSize / 2.0f;
+            grid[row][col]->data = MAINTILE_USED;
+            break;
+        }
+    }
+
+    std::shared_ptr<Enemy> enemy;
+    if (type == SKELETON) 
+    {
+        std::shared_ptr<Skeleton> skeleton = std::make_shared<Skeleton>(enemyPos, player->GetSize(), 75.0f);
+        for (size_t i = 0; i < 4; i++)
+        {
+            skeleton->SetTexture("skeleton" + std::to_string(i));
+        }
+        skeleton->AddAnimation("main", 0, 4, 0.4f, true);
+        enemy = skeleton;
+    }
+    else if (type == SKULL)
+    {
+        std::shared_ptr<Skull> skull = std::make_shared<Skull>(enemyPos, player->GetSize(), 75.0f);
+        for (size_t i = 0; i < 4; i++)
+        {
+            skull->SetTexture("skull" + std::to_string(i));
+        }
+        skull->AddAnimation("main", 0, 4, 0.4f, true);
+        enemy = skull;
+    }
+    else
+    {
+        std::shared_ptr<Vampire> vamp = std::make_shared<Vampire>(enemyPos, player->GetSize(), 75.0f);
+        for (size_t i = 0; i < 4; i++)
+        {
+            vamp->SetTexture("vamp" + std::to_string(i));
+        }
+        vamp->AddAnimation("main", 0, 4, 0.4f, true);
+        enemy = vamp;
+    }
+
+    objList.push_back(enemy);
+    animObjList.push_back(enemy);
+    enemyList.push_back(enemy);
+}
+
 // render
 void Game::Render()
 {
@@ -513,6 +578,8 @@ void Game::Render()
     DrawMapObject(mainTileList);
     DrawObject(mapObjList);
 
+    // chars
+    DrawObject(enemyList);
     DrawObject(player);
 
 #ifdef _TESTING
