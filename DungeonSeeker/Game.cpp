@@ -34,6 +34,7 @@ void Game::LoadResources()
 
     // map
     ResourceManager::LoadTexture("../textures/map/main_tile.png", true, "mainTile");
+    ResourceManager::LoadTexture("../textures/map/filler_tile.png", true, "fillerTile");
     ResourceManager::LoadTexture("../textures/map/main_tile_crack.png", true, "mainTileCrack");
     ResourceManager::LoadTexture("../textures/map/main_tile_stone_0.png", true, "mainTileStone0");
     ResourceManager::LoadTexture("../textures/map/main_tile_stone_1.png", true, "mainTileStone1");
@@ -275,16 +276,16 @@ void Game::SetGrid()
             // corrections
             if (grid[i][j]->data == EMPTY) {
                 if (grid[i - 1][j]->data != EMPTY && grid[i][j + 1]->data != EMPTY) {
-                    grid[i - 1][j + 1]->data = CORNER_TOP_RIGHT;
+                    grid[i - 1][j + 1]->data = FILLER;
                 }
                 else if (grid[i - 1][j]->data != EMPTY && grid[i][j - 1]->data != EMPTY) {
-                    grid[i - 1][j - 1]->data = CORNER_TOP_LEFT;
+                    grid[i - 1][j - 1]->data = FILLER;
                 }
                 else if (grid[i + 1][j]->data != EMPTY && grid[i][j + 1]->data != EMPTY) {
-                    grid[i + 1][j + 1]->data = CORNER_BOT_RIGHT;
+                    grid[i + 1][j + 1]->data = FILLER;
                 }
                 else if (grid[i + 1][j]->data != EMPTY && grid[i][j - 1]->data != EMPTY) {
-                    grid[i + 1][j - 1]->data = CORNER_BOT_LEFT;
+                    grid[i + 1][j - 1]->data = FILLER;
                 }
             }
         }
@@ -376,7 +377,13 @@ void Game::SetTile()
                 mapObjList.push_back(mapObj);
             }
             break;
-
+            case FILLER:
+            {
+                std::shared_ptr<GameObject> mapObj = std::make_shared<GameObject>(grid[i][j]->cellPosition, grid[i][j]->cellSize);
+                mapObj->SetTexture("fillerTile");
+                mapObjList.push_back(mapObj);
+            }
+            break;
             default:
                 break;
             }
@@ -516,16 +523,16 @@ void Game::SpawnEnemy()
     enum EnemyType {
         SKELETON = 0,
         SKULL,
-        PRIEST
+        VAMP
     };
-    EnemyType type = static_cast<EnemyType>(rand() % (PRIEST + 1));
+    EnemyType type = static_cast<EnemyType>(rand() % (VAMP + 1));
 
     // random place
     glm::vec2 enemyPos;
     while (true)
     {
-        int row = rand() % grid.size(), col = rand() % grid[0].size();
-        if (grid[row][col]->data == MAINTILE) {
+        int row = rand() % (grid.size() - 2), col = rand() % (grid[0].size() - 2);
+        if (grid[row][col]->data == MAINTILE && grid[row + 2][col]->data == MAINTILE && grid[row][col + 2]->data == MAINTILE) {
             enemyPos = grid[row][col]->cellPosition + grid[row][col]->cellSize / 2.0f;
             grid[row][col]->data = MAINTILE_USED;
             break;

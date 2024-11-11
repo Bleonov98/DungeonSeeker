@@ -11,29 +11,35 @@ public:
 	void CheckPlayer(glm::vec2 playerPos);
 	virtual void Move(glm::vec2 playerPos);
 
-private:
+protected:
 
 	AttackType atkType = PHYSICAL;
 	float visionRange = 50.0f;
 
 };
 
-struct Skeleton : public Enemy
+class Skeleton : public Enemy
 {
 public:
 	Skeleton(glm::vec2 position, glm::vec2 size, float speed) : Enemy(position, size, speed) {};
 };
 
-struct Skull : public Enemy 
+class Skull : public Enemy
 {
 public:
-	Skull(glm::vec2 position, glm::vec2 size, float speed) : Enemy(position, size, speed) {};
+	Skull(glm::vec2 position, glm::vec2 size, float speed) : Enemy(position, size, speed) {
+		atkType = MAGICAL;
+	};
+	void Move(glm::vec2 playerPos) override;
 };
 
-struct Vampire : public Enemy
+class Vampire : public Enemy
 {
 public:
-	Vampire(glm::vec2 position, glm::vec2 size, float speed) : Enemy(position, size, speed) {};
+	Vampire(glm::vec2 position, glm::vec2 size, float speed) : Enemy(position, size, speed) {
+		atkType = PURE;
+	};
+	void Attack();
 };
 
 #endif // !ENEMY_H
