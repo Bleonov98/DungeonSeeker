@@ -10,7 +10,7 @@ public:
 	Player(glm::vec2 position, glm::vec2 size, float speed) : Character(position, size, speed) {
 		damage = 10;
 		armor = 1.5f;
-		resist = 1.5f;
+		resist = 2.5f;
 	};
 
 	void Move(MoveDirection dir, float dt);
@@ -19,8 +19,6 @@ public:
 	
 	void Attack();
 	bool AttackCollision(std::shared_ptr<Enemy> enemy);
-
-	ActionState GetAction() { return aState; }
 
 	void UpdateAABB() override;
 

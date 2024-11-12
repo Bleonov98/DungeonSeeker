@@ -30,6 +30,7 @@ public:
 	// 
 	int GetDamage() { return this->damage; }
 	float GetSpeed() { return speed; }
+	ActionState GetAction() { return aState; }
 
 	//
 	void Death() { this->isDead = true; }
@@ -39,7 +40,7 @@ protected:
 
 	AttackType attackType = PHYSICAL;
 	ActionState aState = IDLE;
-	float speed, damage, armor, resist, hp; // resist - magic resistance
+	float speed, damage = 0.0f, armor = 0.0f, resist = 0.0f, hp; // resist - magic resistance
 	bool isDead = false;
 
 };

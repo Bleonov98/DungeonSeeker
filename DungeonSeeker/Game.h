@@ -131,6 +131,8 @@ private:
 	std::vector<std::shared_ptr<DynamicObject>> animObjList;
 
 	std::vector<std::shared_ptr<Enemy>> enemyList;
+	std::vector<std::shared_ptr<Vampire>> vampireList;
+	std::vector<std::shared_ptr<MagicSphere>> projectileList;
 
 		// - - - some type
 

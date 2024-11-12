@@ -26,14 +26,14 @@ public:
 	void PlayAnimation(float dt);
 
 	// movement
-	MoveDirection GetDirection() { return direction; }
-	void SetDirection(MoveDirection direction) { this->direction = direction; }
+	MoveDirection GetDirection() { return mDirection; }
+	void SetDirection(MoveDirection direction) { this->mDirection = direction; }
 
 	virtual ~DynamicObject() {}
 
 protected:
 
-	MoveDirection direction = STAND;
+	MoveDirection mDirection = STAND;
 	Animator animator;
 	std::unordered_map<std::string, Animation> animations;
 	std::string currentAnimationName;

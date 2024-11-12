@@ -93,6 +93,9 @@
     <ClInclude Include="Animator.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="MagicSphere.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\fShader.ft">

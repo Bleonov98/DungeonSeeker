@@ -75,6 +75,12 @@ void Game::LoadResources()
     {
         ResourceManager::LoadTexture(("../textures/enemies/vamp/vamp_" + std::to_string(i) + ".png").c_str(), true, "vamp" + std::to_string(i));
     }
+
+    // Items, Projectiles
+    for (size_t i = 0; i < 5; i++)
+    {
+        ResourceManager::LoadTexture(("../textures/enemies/projectile/fireball_" + std::to_string(i) + ".png").c_str(), true, "fireball" + std::to_string(i));
+    }
 }
 
 void Game::InitObjects()
@@ -456,9 +462,29 @@ void Game::Update(float dt)
 {
     if (gmState == ACTIVE) {
         // actions
-        UpdateAnimations(dt);
-
         player->ProcessAction(dt);
+        
+        for (auto i : enemyList)
+        {
+            i->CheckPlayer(player->GetPos());
+            if (i->GetAction() == ATTACK) 
+                i->Move(player->GetPos(), dt);
+        }
+        for (auto i : vampireList)
+        {
+            if (i->GetAction() == ATTACK) {
+                std::shared_ptr<MagicSphere> projectile = i->Attack(player->GetPos(), dt);
+                if (projectile) {
+                    objList.push_back(projectile);
+                    animObjList.push_back(projectile);
+                    projectileList.push_back(projectile);
+                }
+            }
+        }
+        for (auto i : projectileList)
+        {
+            i->Move(dt);
+        }
 
         // update borders after position changes
         for (auto i : objList)
@@ -466,7 +492,8 @@ void Game::Update(float dt)
             i->UpdateAABB();
         }
 
-        // interactions
+        // -
+        UpdateAnimations(dt);
         ProcessCollisions(dt);
     }
 }
@@ -520,11 +547,7 @@ int Game::GetRandomNumber(int min, int max)
 
 void Game::SpawnEnemy()
 {
-    enum EnemyType {
-        SKELETON = 0,
-        SKULL,
-        VAMP
-    };
+    enum EnemyType { SKELETON = 0, SKULL, VAMP };
     EnemyType type = static_cast<EnemyType>(rand() % (VAMP + 1));
 
     // random place
@@ -532,7 +555,7 @@ void Game::SpawnEnemy()
     while (true)
     {
         int row = rand() % (grid.size() - 2), col = rand() % (grid[0].size() - 2);
-        if (grid[row][col]->data == MAINTILE && grid[row + 2][col]->data == MAINTILE && grid[row][col + 2]->data == MAINTILE) {
+        if (grid[row][col]->data == MAINTILE && grid[row + 2][col]->data == MAINTILE && grid[row][col + 2]->data == MAINTILE && glm::distance(grid[row][col]->cellPosition, player->GetPos()) > 600.0f) {
             enemyPos = grid[row][col]->cellPosition + grid[row][col]->cellSize / 2.0f;
             grid[row][col]->data = MAINTILE_USED;
             break;
@@ -542,7 +565,7 @@ void Game::SpawnEnemy()
     std::shared_ptr<Enemy> enemy;
     if (type == SKELETON) 
     {
-        std::shared_ptr<Skeleton> skeleton = std::make_shared<Skeleton>(enemyPos, player->GetSize(), 75.0f);
+        std::shared_ptr<Skeleton> skeleton = std::make_shared<Skeleton>(enemyPos, player->GetSize(), 175.0f);
         for (size_t i = 0; i < 4; i++)
         {
             skeleton->SetTexture("skeleton" + std::to_string(i));
@@ -552,7 +575,7 @@ void Game::SpawnEnemy()
     }
     else if (type == SKULL)
     {
-        std::shared_ptr<Skull> skull = std::make_shared<Skull>(enemyPos, player->GetSize(), 75.0f);
+        std::shared_ptr<Skull> skull = std::make_shared<Skull>(enemyPos, player->GetSize(), 150.0f);
         for (size_t i = 0; i < 4; i++)
         {
             skull->SetTexture("skull" + std::to_string(i));
@@ -562,12 +585,13 @@ void Game::SpawnEnemy()
     }
     else
     {
-        std::shared_ptr<Vampire> vamp = std::make_shared<Vampire>(enemyPos, player->GetSize(), 75.0f);
+        std::shared_ptr<Vampire> vamp = std::make_shared<Vampire>(enemyPos, player->GetSize(), 125.0f);
         for (size_t i = 0; i < 4; i++)
         {
             vamp->SetTexture("vamp" + std::to_string(i));
         }
         vamp->AddAnimation("main", 0, 4, 0.4f, true);
+        vampireList.push_back(vamp);
         enemy = vamp;
     }
 
@@ -585,8 +609,9 @@ void Game::Render()
     DrawMapObject(mainTileList);
     DrawObject(mapObjList);
 
-    // chars
+    // objects
     DrawObject(enemyList);
+    DrawObject(projectileList);
     DrawObject(player);
 
 #ifdef _TESTING
@@ -614,6 +639,8 @@ void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size) // m
 
 void Game::DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects)
 {
+    if (objects.empty()) return;
+
     ResourceManager::GetShader("spriteShader").Use();
     ResourceManager::GetShader("spriteShader").SetMatrix4("projection", projection);
     ResourceManager::GetShader("spriteShader").SetMatrix4("view", view);
@@ -641,6 +668,8 @@ void Game::DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects)
 template <typename T>
 void Game::DrawObject(std::vector<std::shared_ptr<T>> objectVector)
 {
+    if (objectVector.empty()) return;
+
     ResourceManager::GetShader("spriteShader").Use();
     ResourceManager::GetShader("spriteShader").SetMatrix4("projection", projection);
     ResourceManager::GetShader("spriteShader").SetMatrix4("view", view);
