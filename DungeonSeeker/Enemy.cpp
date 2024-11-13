@@ -71,7 +71,7 @@ std::shared_ptr<MagicSphere> Vampire::Attack(glm::vec2 playerPos, float dt)
 	{
 		glm::vec2 projectileDir = glm::normalize(playerPos - position);
 
-		MagicSphere projectile(position + size / 2.0f, size / 2.5f, projectileDir);
+		MagicSphere projectile(position + size / 2.0f, size / 2.5f, projectileDir, damage);
 		for (size_t i = 0; i < 5; i++)
 		{
 			projectile.SetTexture("fireball" + std::to_string(i));

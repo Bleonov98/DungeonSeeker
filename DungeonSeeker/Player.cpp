@@ -11,14 +11,14 @@ void Player::Move(MoveDirection dir, float dt)
 	case STAND:
 		break;
 	case DIR_UP:
-		position.y -= speed * dt;
+		if (position.y > 1.0f) position.y -= speed * dt;
 		break;
 	case DIR_DOWN:
 		position.y += speed * dt;
 		break;
 	case DIR_LEFT:
 		if (lastTextureDir != dir) flipHorizontally = true;
-		position.x -= speed * dt;
+		if (position.x > 1.0f) position.x -= speed * dt;
 		break;
 	case DIR_RIGHT:
 		if (lastTextureDir != dir) flipHorizontally = false;

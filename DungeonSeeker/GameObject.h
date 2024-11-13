@@ -44,7 +44,8 @@ public:
 	bool TopCollision(const GameObject& other) { return hBox.IntersectTop(other.hBox); }
 
 	// - - - - - -
-
+	void DeleteObject() { isDeleted = true; }
+	bool IsDeleted() { return isDeleted; }
 	virtual ~GameObject() {};
 
 protected:
@@ -60,6 +61,7 @@ protected:
 	bool flipHorizontally = false;
 	float angle;
 
+	bool isDeleted = false;
 };
 
 #endif // !GAMEOBJECT_H

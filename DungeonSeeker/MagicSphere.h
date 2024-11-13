@@ -5,7 +5,7 @@
 class MagicSphere : public DynamicObject
 {
 public:
-	MagicSphere(glm::vec2 position, glm::vec2 size, glm::vec2 direction) : DynamicObject(position, size) {
+	MagicSphere(glm::vec2 position, glm::vec2 size, glm::vec2 direction, int damage) : DynamicObject(position, size) {
 		speed = 400.0f;
 		this->direction = direction;
 	};

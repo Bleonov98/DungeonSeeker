@@ -98,13 +98,16 @@ public:
 
 	void Menu();
 	void Settings();
-	//void Restart();
 
 	// game
 	void SpawnEnemy();
+	void UpdateEnemies(float dt);
 
 	// utility
 	int GetRandomNumber(int min, int max);
+	template<typename T>
+	void EraseFromVector(std::vector<std::shared_ptr<T>>& vector);
+	void DeleteObjects();
 
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], mouseKeys[8], mouseKeysProcessed[8], close = false;
@@ -129,6 +132,7 @@ private:
 	// objects
 	std::vector<std::shared_ptr<GameObject>> objList;
 	std::vector<std::shared_ptr<DynamicObject>> animObjList;
+	std::vector<std::shared_ptr<Character>> characterList;
 
 	std::vector<std::shared_ptr<Enemy>> enemyList;
 	std::vector<std::shared_ptr<Vampire>> vampireList;

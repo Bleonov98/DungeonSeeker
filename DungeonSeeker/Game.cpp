@@ -106,6 +106,7 @@ void Game::InitObjects()
 
     objList.push_back(player);
     animObjList.push_back(player);
+    characterList.push_back(player);
     // - - - - - - - - - - - - - - - - - -
 
     GenerateDungeon();
@@ -463,28 +464,7 @@ void Game::Update(float dt)
     if (gmState == ACTIVE) {
         // actions
         player->ProcessAction(dt);
-        
-        for (auto i : enemyList)
-        {
-            i->CheckPlayer(player->GetPos());
-            if (i->GetAction() == ATTACK) 
-                i->Move(player->GetPos(), dt);
-        }
-        for (auto i : vampireList)
-        {
-            if (i->GetAction() == ATTACK) {
-                std::shared_ptr<MagicSphere> projectile = i->Attack(player->GetPos(), dt);
-                if (projectile) {
-                    objList.push_back(projectile);
-                    animObjList.push_back(projectile);
-                    projectileList.push_back(projectile);
-                }
-            }
-        }
-        for (auto i : projectileList)
-        {
-            i->Move(dt);
-        }
+        UpdateEnemies(dt);
 
         // update borders after position changes
         for (auto i : objList)
@@ -505,46 +485,66 @@ void Game::UpdateAnimations(float dt)
         animObjList[i]->PlayAnimation(dt);
     }
 
+    for (auto ch : characterList)
+    {
+        ch->DamageAnimation(dt);
+    }
+
 }
 
 void Game::ProcessCollisions(float dt)
 {
-    // player collisions
-        // map collision
+    
+    // map collision
     for (size_t i = 0; i < mapObjList.size(); i++)
     {
+        // player map
         if (i == 0) player->ProcessCollision((*mapObjList[i]), true, dt); // bool prevents double collision
         else player->ProcessCollision((*mapObjList[i]), false, dt);
         
-    }
-        // attack collision
-    if (player->GetAction() == ATTACK) {
-        for (size_t i = 0; i < enemyList.size(); i++)
+        // enemy map
+        for (auto enemy : enemyList)
         {
-            player->AttackCollision(enemyList[i]);
+            if (std::dynamic_pointer_cast<Skull>(enemy) != nullptr) // skull going throught walls
+                continue;
+            if (i == 0) enemy->ProcessCollision((*mapObjList[i]), true, dt);
+            else enemy->ProcessCollision((*mapObjList[i]), false, dt);
+        }
+
+        // projectile map
+        for (auto proj : projectileList)
+        {
+            if (proj->ObjectCollision(*mapObjList[i]))
+                proj->DeleteObject();
         }
     }
 
-}
-
-// utility
-int Game::GetRandomNumber(int min, int max)
-{
-    int pseudoRandNum = 0;
-    static int number = 0;
-
-    if (number > 14 + rand() % 10) {
-        number = 0;
-        pseudoRandNum = min + rand() % (max - min);
-    }
-    else {
-        pseudoRandNum = min;
+    // player collisions
+        // attack collision
+    if (player->GetAction() == ATTACK) {
+        for (auto i : enemyList)
+        {
+            if (player->AttackCollision(i))
+            {
+                i->Hit(player->GetDamage(), player->GetAtkType());
+                i->Push(player->GetPos());
+            }
+        }
     }
 
-    number++;
-    return pseudoRandNum;
+    // enemy collisions
+    for (auto enemy : enemyList)
+    {
+        if (enemy->ObjectCollision(*player)) {
+            enemy->ProcessCollision(*player, false, dt);
+            player->Hit(enemy->GetDamage(), enemy->GetAtkType());
+            player->Push(enemy->GetPos());
+            break;
+        }
+    }
 }
 
+// game
 void Game::SpawnEnemy()
 {
     enum EnemyType { SKELETON = 0, SKULL, VAMP };
@@ -563,7 +563,7 @@ void Game::SpawnEnemy()
     }
 
     std::shared_ptr<Enemy> enemy;
-    if (type == SKELETON) 
+    if (type == SKELETON)
     {
         std::shared_ptr<Skeleton> skeleton = std::make_shared<Skeleton>(enemyPos, player->GetSize(), 175.0f);
         for (size_t i = 0; i < 4; i++)
@@ -597,7 +597,71 @@ void Game::SpawnEnemy()
 
     objList.push_back(enemy);
     animObjList.push_back(enemy);
+    characterList.push_back(enemy);
     enemyList.push_back(enemy);
+}
+
+void Game::UpdateEnemies(float dt) 
+{
+    for (auto i : enemyList)
+    {
+        i->CheckPlayer(player->GetPos());
+        if (i->GetAction() == ATTACK)
+            i->Move(player->GetPos(), dt);
+    }
+    for (auto i : vampireList)
+    {
+        if (i->GetAction() == ATTACK) {
+            std::shared_ptr<MagicSphere> projectile = i->Attack(player->GetPos(), dt);
+            if (projectile) {
+                objList.push_back(projectile);
+                animObjList.push_back(projectile);
+                projectileList.push_back(projectile);
+            }
+        }
+    }
+    for (auto i : projectileList)
+    {
+        i->Move(dt);
+    }
+}
+
+void Game::DeleteObjects()
+{
+    EraseFromVector(enemyList);
+    EraseFromVector(vampireList);
+    EraseFromVector(projectileList);
+    
+    EraseFromVector(animObjList);
+    EraseFromVector(objList);
+}
+
+// utility
+int Game::GetRandomNumber(int min, int max)
+{
+    int pseudoRandNum = 0;
+    static int number = 0;
+
+    if (number > 14 + rand() % 10) {
+        number = 0;
+        pseudoRandNum = min + rand() % (max - min);
+    }
+    else {
+        pseudoRandNum = min;
+    }
+
+    number++;
+    return pseudoRandNum;
+}
+
+template<typename T>
+void Game::EraseFromVector(std::vector<std::shared_ptr<T>>& vector) 
+{
+    vector.erase(
+        std::remove_if(vector.begin(), vector.end(),
+            [](const std::shared_ptr<T>& obj) { return obj->IsDeleted(); }),
+        vector.end()
+    );
 }
 
 // render
