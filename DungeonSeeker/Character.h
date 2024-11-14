@@ -35,17 +35,20 @@ public:
 	ActionState GetAction() { return aState; }
 	AttackType GetAtkType() { return attackType; }
 
+	bool IsDamaged() { return damaged; }
+	bool IsDead() { return isDead; }
+
 protected:
 
 	AttackType attackType = PHYSICAL;
 	ActionState aState = IDLE;
 
 	glm::vec2 pushDirection;
-	float pushDistance = 50.0f;
+	float pushStrength = 200.0f;
 
 	float speed, damage = 0.0f, armor = 0.0f, resist = 0.0f, hp; // resist - magic resistance
 	float damageTime = 0.0f, damageDelay = 1.0f;
-	bool damaged = false;
+	bool damaged = false, isDead = false;
 
 };
 

@@ -10,6 +10,8 @@ void Enemy::CheckPlayer(glm::vec2 playerPos)
 
 void Enemy::Move(glm::vec2 playerPos, float dt)
 {
+	if (damaged) return;
+
 	glm::vec2 direction = glm::normalize(playerPos - position);
 	this->position += direction * speed * dt;
 
@@ -21,6 +23,8 @@ void Enemy::Move(glm::vec2 playerPos, float dt)
 
 void Skull::Move(glm::vec2 playerPos, float dt)
 {
+	if (damaged) return;
+
 	enum TpDirection { TOP, RIGHT, BOT, LEFT };
 	TpDirection tpDir = static_cast<TpDirection>(rand() % (LEFT + 1));
 
@@ -71,7 +75,7 @@ std::shared_ptr<MagicSphere> Vampire::Attack(glm::vec2 playerPos, float dt)
 	{
 		glm::vec2 projectileDir = glm::normalize(playerPos - position);
 
-		MagicSphere projectile(position + size / 2.0f, size / 2.5f, projectileDir, damage);
+		MagicSphere projectile(shared_from_this(), projectileDir);
 		for (size_t i = 0; i < 5; i++)
 		{
 			projectile.SetTexture("fireball" + std::to_string(i));

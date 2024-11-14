@@ -44,7 +44,7 @@ private:
 	float tpTimer = 0.0f, tpDelay = 2.5f;
 };
 
-class Vampire : public Enemy
+class Vampire : public Enemy, public std::enable_shared_from_this<Vampire>
 {
 public:
 	Vampire(glm::vec2 position, glm::vec2 size, float speed) : Enemy(position, size, speed) {
@@ -54,7 +54,7 @@ public:
 	};
 	std::shared_ptr<MagicSphere> Attack(glm::vec2 playerPos, float dt);
 private:
-	float atkTimer = 0.0f, atkDelay = 1.25f;
+	float atkTimer = 0.0f, atkDelay = 1.75f;
 };
 
 #endif // !ENEMY_H

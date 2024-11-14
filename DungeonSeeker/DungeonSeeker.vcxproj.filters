@@ -49,6 +49,8 @@
     <ClCompile Include="Animator.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="MagicSphere.cpp" />
+    <ClCompile Include="Item.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h">
@@ -96,6 +98,7 @@
     <ClInclude Include="MagicSphere.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="Item.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\fShader.ft">

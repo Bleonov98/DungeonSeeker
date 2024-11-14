@@ -475,6 +475,8 @@ void Game::Update(float dt)
         // -
         UpdateAnimations(dt);
         ProcessCollisions(dt);
+
+        DeleteObjects();
     }
 }
 
@@ -494,15 +496,45 @@ void Game::UpdateAnimations(float dt)
 
 void Game::ProcessCollisions(float dt)
 {
-    
-    // map collision
+    // player collisions
+        // player map collision
     for (size_t i = 0; i < mapObjList.size(); i++)
     {
-        // player map
         if (i == 0) player->ProcessCollision((*mapObjList[i]), true, dt); // bool prevents double collision
         else player->ProcessCollision((*mapObjList[i]), false, dt);
-        
-        // enemy map
+    }
+        // player attack and enemy collision
+    for (auto i : enemyList)
+    {
+        if (player->GetAction() == ATTACK && player->AttackCollision(i)) {
+            i->Hit(player->GetDamage(), player->GetAtkType());
+            i->Push(player->GetPos());
+        }
+        else if (i->ObjectCollision(*player)) {
+            i->ProcessCollision(*player, false, dt);
+            player->Hit(i->GetDamage(), i->GetAtkType());
+            player->Push(i->GetPos());
+        }
+    }
+
+    // projectile collisions
+    for (auto proj : projectileList)
+    {
+        for (auto ch : characterList)
+        {
+            if (proj->GetOwner() != ch && proj->ObjectCollision(*ch)) {
+                ch->Hit(proj->GetDamage(), PURE);
+                ch->Push(proj->GetPos());
+                proj->DeleteObject();
+                break;
+            }
+        }
+    }
+
+    // enemy collisions
+        // enemy map collision
+    for (size_t i = 0; i < mapObjList.size(); i++)
+    {
         for (auto enemy : enemyList)
         {
             if (std::dynamic_pointer_cast<Skull>(enemy) != nullptr) // skull going throught walls
@@ -510,36 +542,15 @@ void Game::ProcessCollisions(float dt)
             if (i == 0) enemy->ProcessCollision((*mapObjList[i]), true, dt);
             else enemy->ProcessCollision((*mapObjList[i]), false, dt);
         }
+    }
 
-        // projectile map
+    // projectile map
+    for (size_t i = 0; i < mapObjList.size(); i++)
+    {
         for (auto proj : projectileList)
         {
             if (proj->ObjectCollision(*mapObjList[i]))
                 proj->DeleteObject();
-        }
-    }
-
-    // player collisions
-        // attack collision
-    if (player->GetAction() == ATTACK) {
-        for (auto i : enemyList)
-        {
-            if (player->AttackCollision(i))
-            {
-                i->Hit(player->GetDamage(), player->GetAtkType());
-                i->Push(player->GetPos());
-            }
-        }
-    }
-
-    // enemy collisions
-    for (auto enemy : enemyList)
-    {
-        if (enemy->ObjectCollision(*player)) {
-            enemy->ProcessCollision(*player, false, dt);
-            player->Hit(enemy->GetDamage(), enemy->GetAtkType());
-            player->Push(enemy->GetPos());
-            break;
         }
     }
 }
@@ -606,12 +617,12 @@ void Game::UpdateEnemies(float dt)
     for (auto i : enemyList)
     {
         i->CheckPlayer(player->GetPos());
-        if (i->GetAction() == ATTACK)
+        if (i->GetAction() == ATTACK && !player->IsDamaged())
             i->Move(player->GetPos(), dt);
     }
     for (auto i : vampireList)
     {
-        if (i->GetAction() == ATTACK) {
+        if (i->GetAction() == ATTACK && !player->IsDamaged()) {
             std::shared_ptr<MagicSphere> projectile = i->Attack(player->GetPos(), dt);
             if (projectile) {
                 objList.push_back(projectile);

@@ -49,7 +49,6 @@ void Character::Push(glm::vec2 position)
 
     pushDirection = glm::normalize(this->position - position);
 
-    this->position += pushDistance * pushDirection;
     colour = glm::vec3(1.0f, 0.0f, 0.0f);
     damaged = true;
 }
@@ -59,6 +58,10 @@ void Character::DamageAnimation(float dt)
     if (!damaged) return;
 
     damageTime += dt;
+    
+    float pushValue = pushStrength * (1.0f - damageTime);
+    position += pushDirection * pushValue * dt;
+    
     colour = glm::vec3(1.0f, damageTime, damageTime);
     if (damageTime >= damageDelay) {
         damaged = false;
