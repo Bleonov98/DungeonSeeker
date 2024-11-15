@@ -475,6 +475,7 @@ void Game::Update(float dt)
         // -
         UpdateAnimations(dt);
         ProcessCollisions(dt);
+        ProcessDeaths();
 
         DeleteObjects();
     }
@@ -555,12 +556,64 @@ void Game::ProcessCollisions(float dt)
     }
 }
 
+void Game::ProcessDeaths()
+{
+    for (auto enemy : enemyList)
+    {
+        if (enemy->IsDead()) {
+            player->LevelUp(enemy->GetExpCost());
+
+            std::vector<std::shared_ptr<Item>> loot = enemy->GetLoot();
+            if (!loot.empty()) {
+                objList.insert(objList.end(), loot.begin(), loot.end());
+                animObjList.insert(animObjList.end(), loot.begin(), loot.end());
+                itemList.insert(itemList.end(), loot.begin(), loot.end());
+            }
+        }
+    }
+
+    for (auto ch : characterList)
+    {
+        if (ch->IsDead()) {
+            ch->DeleteObject();
+        }
+    }
+}
+
 // game
+std::vector<DropEntry> Game::GetItemsByRarity(ItemRarity rarity)
+{
+    std::vector<DropEntry> drop;
+    DropEntry items;
+
+    items.itemID = ItemID::HP_POTION;
+    items.dropChance = 50;
+    drop.push_back(items);
+
+    items.itemID = ItemID::MS_POTION;
+    items.dropChance = 30;
+    drop.push_back(items);
+
+    if (rarity == ItemRarity::RARE)
+    {
+        items.itemID = ItemID::STAT_UPGRADE;
+        items.dropChance = 10;
+        drop.push_back(items);
+    }
+    else if (rarity == ItemRarity::UNIQUE) {
+        items.itemID = ItemID::TYPE_UPGRADE;
+        items.dropChance = 1;
+        drop.push_back(items);
+    }
+
+    return drop;
+}
+
 void Game::SpawnEnemy()
 {
     enum EnemyType { SKELETON = 0, SKULL, VAMP };
     EnemyType type = static_cast<EnemyType>(rand() % (VAMP + 1));
-
+    
     // random place
     glm::vec2 enemyPos;
     while (true)
@@ -576,7 +629,7 @@ void Game::SpawnEnemy()
     std::shared_ptr<Enemy> enemy;
     if (type == SKELETON)
     {
-        std::shared_ptr<Skeleton> skeleton = std::make_shared<Skeleton>(enemyPos, player->GetSize(), 175.0f);
+        std::shared_ptr<Skeleton> skeleton = std::make_shared<Skeleton>(enemyPos, player->GetSize(), 175.0f, GetItemsByRarity(ItemRarity::COMMON));
         for (size_t i = 0; i < 4; i++)
         {
             skeleton->SetTexture("skeleton" + std::to_string(i));
@@ -586,7 +639,7 @@ void Game::SpawnEnemy()
     }
     else if (type == SKULL)
     {
-        std::shared_ptr<Skull> skull = std::make_shared<Skull>(enemyPos, player->GetSize(), 150.0f);
+        std::shared_ptr<Skull> skull = std::make_shared<Skull>(enemyPos, player->GetSize(), 150.0f, GetItemsByRarity(ItemRarity::RARE));
         for (size_t i = 0; i < 4; i++)
         {
             skull->SetTexture("skull" + std::to_string(i));
@@ -596,7 +649,7 @@ void Game::SpawnEnemy()
     }
     else
     {
-        std::shared_ptr<Vampire> vamp = std::make_shared<Vampire>(enemyPos, player->GetSize(), 125.0f);
+        std::shared_ptr<Vampire> vamp = std::make_shared<Vampire>(enemyPos, player->GetSize(), 125.0f, GetItemsByRarity(ItemRarity::UNIQUE));
         for (size_t i = 0; i < 4; i++)
         {
             vamp->SetTexture("vamp" + std::to_string(i));

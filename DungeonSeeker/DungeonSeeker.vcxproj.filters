@@ -49,8 +49,18 @@
     <ClCompile Include="Animator.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="MagicSphere.cpp" />
-    <ClCompile Include="Item.cpp" />
+    <ClCompile Include="Item.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="MagicSphere.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Potion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Upgrade.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h">
@@ -98,7 +108,15 @@
     <ClInclude Include="MagicSphere.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="Item.h" />
+    <ClInclude Include="Item.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Potion.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Upgrade.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\fShader.ft">

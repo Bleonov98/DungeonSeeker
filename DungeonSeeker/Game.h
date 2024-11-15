@@ -10,6 +10,8 @@
 
 #include "Dungeon.h"
 #include "Player.h"
+#include "Potion.h"
+#include "Upgrade.h"
 
 #include <memory>
 
@@ -79,6 +81,7 @@ public:
 	void Update(float dt);
 	void UpdateAnimations(float dt);
 	void ProcessCollisions(float dt);
+	void ProcessDeaths();
 
 	// level generation
 	void GenerateDungeon();
@@ -100,6 +103,7 @@ public:
 	void Settings();
 
 	// game
+	std::vector<DropEntry> GetItemsByRarity(ItemRarity rarity);
 	void SpawnEnemy();
 	void UpdateEnemies(float dt);
 
@@ -126,17 +130,25 @@ private:
 
 	// map
 	std::vector<std::vector<std::shared_ptr<Grid>>> grid;
+
 	std::vector<std::shared_ptr<MapObject>> mainTileList;
 	std::vector<std::shared_ptr<GameObject>> mapObjList;
 
 	// objects
+		// general
 	std::vector<std::shared_ptr<GameObject>> objList;
 	std::vector<std::shared_ptr<DynamicObject>> animObjList;
 	std::vector<std::shared_ptr<Character>> characterList;
 
+		// enemies
 	std::vector<std::shared_ptr<Enemy>> enemyList;
 	std::vector<std::shared_ptr<Vampire>> vampireList;
+	
+		// projectiles
 	std::vector<std::shared_ptr<MagicSphere>> projectileList;
+
+		// items
+	std::vector<std::shared_ptr<Item>> itemList;
 
 		// - - - some type
 

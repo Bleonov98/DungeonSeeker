@@ -58,6 +58,19 @@ bool Player::AttackCollision(std::shared_ptr<Enemy> enemy)
 	return false;
 }
 
+void Player::LevelUp(float experience)
+{
+	this->exp += experience;
+	if (exp >= expThreshold) {
+		lvl++;
+		exp -= expThreshold;
+
+		damage += 2.5f;
+		armor += 1.0f;
+		resist += 0.5f;
+	}
+}
+
 void Player::UpdateAABB()
 {
 	hBox.SetBorder(glm::vec2(position.x + size.x / 3.0f, position.y + size.y / 2.5f), position + size - glm::vec2(size.x / 3.0f, 0));

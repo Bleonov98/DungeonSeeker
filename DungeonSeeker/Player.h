@@ -3,8 +3,9 @@
 
 #include "Character.h"
 #include "Enemy.h"
-
-class Player : public Character
+#include "Item.h"
+ 
+class Player : public Character 
 {
 public:
 	Player(glm::vec2 position, glm::vec2 size, float speed) : Character(position, size, speed) {
@@ -20,6 +21,8 @@ public:
 	void Attack();
 	bool AttackCollision(std::shared_ptr<Enemy> enemy);
 
+	void LevelUp(float experience);
+
 	void UpdateAABB() override;
 
 private:
@@ -27,6 +30,11 @@ private:
 	// attack
 	AABB daggerhBox;
 	float attackDuration = 0.45f, attackTimer = 0.0f;
+	
+	float exp = 0.0f, expThreshold = 50.0f;
+	int lvl;
+
+	std::vector<std::shared_ptr<Item>> inventory;
 
 };
 

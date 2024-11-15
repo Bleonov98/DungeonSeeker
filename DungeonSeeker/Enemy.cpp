@@ -1,5 +1,10 @@
 #include "Enemy.h"
 
+#include "Potion.h"
+#include "Upgrade.h"
+
+#include <random>
+
 void Enemy::CheckPlayer(glm::vec2 playerPos)
 {
 	if (glm::distance(this->position, playerPos) <= visionRange)
@@ -19,6 +24,83 @@ void Enemy::Move(glm::vec2 playerPos, float dt)
 		flipHorizontally = true;
 	else
 		flipHorizontally = false;
+}
+
+std::vector<std::shared_ptr<Item>> Enemy::GetLoot()
+{
+	std::vector<std::shared_ptr<Item>> loot;
+	std::vector<ItemID> itemIDs;
+
+	int totalWeight = 0;
+	for (const auto& entry : drop) {
+		totalWeight += entry.dropChance;
+	}
+
+	if (totalWeight == 0) { // mb isn't needed
+		return loot; 
+	}
+
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	
+	std::uniform_int_distribution<> dis(0, totalWeight);
+	std::uniform_int_distribution<> randIt(1, 2); // amount of items
+
+	int accumulatedWeight = 0, itemAmount = randIt(gen);
+	for (size_t i = 0; i < itemAmount; i++)
+	{
+		int num = dis(gen);
+		for (const auto& entry : drop) {
+			accumulatedWeight += entry.dropChance;
+			if (num <= accumulatedWeight) {
+				itemIDs.push_back(entry.itemID);
+				break;
+			}
+		}
+	}
+
+	// size of item
+	std::uniform_real_distribution<> sizeDis(0.0, 1.0);
+	PotionSize pSize;
+	(sizeDis(gen) > 0.5f) ? pSize = SMALL : pSize = BIG;
+
+	std::shared_ptr<Item> item;
+	for (auto i : itemIDs)
+	{
+		switch (i)
+		{
+		case ItemID::HP_POTION:
+		{
+			std::shared_ptr<HealthPotion> hpPotion = std::make_shared<HealthPotion>(position, size / 2.0f, pSize);
+			item = hpPotion;
+		}
+		break;
+		case ItemID::MS_POTION:
+		{
+			std::shared_ptr<MSPotion> msPotion = std::make_shared<MSPotion>(position, size / 2.0f, pSize);
+			item = msPotion;
+		}
+		break;
+		case ItemID::STAT_UPGRADE:
+		{
+			std::shared_ptr<StatsUpgrade> statsUpgrade = std::make_shared<StatsUpgrade>(position, size / 2.0f);
+			item = statsUpgrade;
+		}
+		break;
+		case ItemID::TYPE_UPGRADE:
+		{
+			std::shared_ptr<DamageTypeUpgrade> typeUpgrade = std::make_shared<DamageTypeUpgrade>(position, size / 2.0f);
+			item = typeUpgrade;
+		}
+		break;
+		default:
+			break;
+		}
+
+		loot.push_back(item);
+	}
+
+	return loot;
 }
 
 void Skull::Move(glm::vec2 playerPos, float dt)

@@ -8,7 +8,6 @@
 class GameObject
 {
 public:
-
 	GameObject(glm::vec2 position, glm::vec2 size, float angle = 0.0f, glm::vec3 colour = glm::vec3(1.0f)) {
 		this->position = position, this->colour = colour, this->size = size, this->angle = angle;
 
