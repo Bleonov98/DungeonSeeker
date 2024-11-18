@@ -81,6 +81,18 @@ void Game::LoadResources()
     {
         ResourceManager::LoadTexture(("../textures/enemies/projectile/fireball_" + std::to_string(i) + ".png").c_str(), true, "fireball" + std::to_string(i));
     }
+
+    for (size_t i = 0; i < 4; i++)
+    {
+        ResourceManager::LoadTexture(("../textures/items/potions/hpPotion_small_" + std::to_string(i) + ".png").c_str(), true, "hpPotionSmall" + std::to_string(i));
+        ResourceManager::LoadTexture(("../textures/items/potions/hpPotion_" + std::to_string(i) + ".png").c_str(), true, "hpPotion" + std::to_string(i));
+    }
+
+    for (size_t i = 0; i < 4; i++)
+    {
+        ResourceManager::LoadTexture(("../textures/items/potions/msPotion_small_" + std::to_string(i) + ".png").c_str(), true, "msPotionSmall" + std::to_string(i));
+        ResourceManager::LoadTexture(("../textures/items/potions/msPotion_" + std::to_string(i) + ".png").c_str(), true, "msPotion" + std::to_string(i));
+    }
 }
 
 void Game::InitObjects()
@@ -586,25 +598,25 @@ std::vector<DropEntry> Game::GetItemsByRarity(ItemRarity rarity)
     std::vector<DropEntry> drop;
     DropEntry items;
 
-    items.itemID = ItemID::HP_POTION;
-    items.dropChance = 50;
-    drop.push_back(items);
-
-    items.itemID = ItemID::MS_POTION;
-    items.dropChance = 30;
-    drop.push_back(items);
-
-    if (rarity == ItemRarity::RARE)
+    if (rarity == ItemRarity::UNIQUE) {
+        items.itemID = ItemID::TYPE_UPGRADE;
+        items.dropChance = 1;
+        drop.push_back(items);
+    }
+    else if (rarity == ItemRarity::RARE)
     {
         items.itemID = ItemID::STAT_UPGRADE;
         items.dropChance = 10;
         drop.push_back(items);
     }
-    else if (rarity == ItemRarity::UNIQUE) {
-        items.itemID = ItemID::TYPE_UPGRADE;
-        items.dropChance = 1;
-        drop.push_back(items);
-    }
+
+    items.itemID = ItemID::MS_POTION;
+    items.dropChance = 20;
+    drop.push_back(items);
+
+    items.itemID = ItemID::HP_POTION;
+    items.dropChance = 30;
+    drop.push_back(items);
 
     return drop;
 }
@@ -740,6 +752,7 @@ void Game::Render()
     // objects
     DrawObject(enemyList);
     DrawObject(projectileList);
+    DrawObject(itemList);
     DrawObject(player);
 
 #ifdef _TESTING

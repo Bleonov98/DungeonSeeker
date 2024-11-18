@@ -13,6 +13,9 @@ class Potion : public Item
 public:
 	Potion(glm::vec2 position, glm::vec2 size, PotionSize pSize) : Item(position, size) {};
 	virtual void Use() = 0;
+
+	virtual void InitPotionData(std::string texSize) = 0;
+		
 protected:
 	float duration, durationTime = 0.0f;
 };
@@ -23,9 +26,22 @@ public:
 	HealthPotion(glm::vec2 position, glm::vec2 size, PotionSize pSize) : Potion(position, size, pSize) {
 		itemID = ItemID::HP_POTION;
 		duration = 10.0f;
-		pSize == SMALL ? hpRestore = 0.75f : hpRestore = 1.5f;
+
+		std::string texSize;
+		if (pSize == SMALL) {
+			hpRestore = 0.75f;
+			texSize = "Small";
+		}
+		else {
+			hpRestore = 1.5f;
+			texSize = "";
+		}
+		InitPotionData(texSize);
 	}
+
+	void InitPotionData(std::string texSize) override;
 	void Use() override;
+
 private:
 	float hpRestore, tickRate = 1.0f;
 };
@@ -37,9 +53,22 @@ public:
 	MSPotion(glm::vec2 position, glm::vec2 size, PotionSize pSize) : Potion(position, size, pSize) {
 		itemID = ItemID::HP_POTION;
 		duration = 30.0f;
-		pSize == SMALL ? msUpRate = 25.0f : msUpRate = 50.0f;
+
+		std::string texSize;
+		if (pSize == SMALL) {
+			msUpRate = 25.0f;
+			texSize = "Small";
+		}
+		else {
+			msUpRate = 50.0f;
+			texSize = "";
+		}
+		InitPotionData(texSize);
 	};
+
+	void InitPotionData(std::string texSize) override;
 	void Use() override;
+
 private:
 	float msUpRate;
 };

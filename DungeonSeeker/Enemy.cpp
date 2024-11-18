@@ -28,36 +28,33 @@ void Enemy::Move(glm::vec2 playerPos, float dt)
 
 std::vector<std::shared_ptr<Item>> Enemy::GetLoot()
 {
+	//
+	static int multiplier = 0;
+
 	std::vector<std::shared_ptr<Item>> loot;
 	std::vector<ItemID> itemIDs;
 
-	int totalWeight = 0;
-	for (const auto& entry : drop) {
-		totalWeight += entry.dropChance;
-	}
-
-	if (totalWeight == 0) { // mb isn't needed
-		return loot; 
-	}
-
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	
-	std::uniform_int_distribution<> dis(0, totalWeight);
+	std::uniform_int_distribution<> dis(0, 100);
 	std::uniform_int_distribution<> randIt(1, 2); // amount of items
 
-	int accumulatedWeight = 0, itemAmount = randIt(gen);
+	int itemAmount = randIt(gen), increasedRate = 2 * multiplier;
 	for (size_t i = 0; i < itemAmount; i++)
 	{
 		int num = dis(gen);
+		if (num > 10 + increasedRate) num -= increasedRate; // multiplier doesn't work for rare+ items
 		for (const auto& entry : drop) {
-			accumulatedWeight += entry.dropChance;
-			if (num <= accumulatedWeight) {
+			if (num <= entry.dropChance) {
 				itemIDs.push_back(entry.itemID);
 				break;
 			}
 		}
 	}
+
+	// increase the rates if there hasn’t been any loot for a long time
+	if (loot.empty()) multiplier++;
+	else multiplier = 0;
 
 	// size of item
 	std::uniform_real_distribution<> sizeDis(0.0, 1.0);
