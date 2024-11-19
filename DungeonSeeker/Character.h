@@ -14,6 +14,11 @@ enum ActionState {
 	ATTACK
 };
 
+struct StatusBar
+{
+	glm::vec2 size, position;
+};
+
 class Character : public DynamicObject
 {
 public:
@@ -31,7 +36,11 @@ public:
 
 	// 
 	int GetDamage() { return this->damage; }
+	int GetHP() { return hp; }
+	int GetArmor() { return armor; }
+	int GetResist() { return resist; }
 	float GetSpeed() { return speed; }
+
 	ActionState GetAction() { return aState; }
 	AttackType GetAtkType() { return attackType; }
 
@@ -40,13 +49,14 @@ public:
 
 protected:
 
+	StatusBar healthBar;
 	AttackType attackType = PHYSICAL;
 	ActionState aState = IDLE;
 
 	glm::vec2 pushDirection;
 	float pushStrength = 200.0f;
 
-	float speed, damage = 0.0f, armor = 0.0f, resist = 0.0f, hp; // resist - magic resistance
+	float speed, damage = 0.0f, armor = 0.0f, resist = 0.0f, hp, maxHealth; // resist - magic resistance
 	float damageTime = 0.0f, damageDelay = 1.0f;
 	bool damaged = false, isDead = false;
 

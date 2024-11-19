@@ -97,15 +97,18 @@ public:
 	void DrawObject(std::vector<std::shared_ptr<T>> objectVector); // vector of objects with instancing
 	template <typename T>
 	void DrawObject(std::shared_ptr<T> object); // single object without instancing
-	//void DrawStats();
 
 	void Menu();
 	void Settings();
 
 	// game
 	std::vector<DropEntry> GetItemsByRarity(ItemRarity rarity);
+		// enemies
 	void SpawnEnemy();
 	void UpdateEnemies(float dt);
+		// player
+	void ShowPlayerStats();
+	void ShowPlayerInventory();
 
 	// utility
 	int GetRandomNumber(int min, int max);

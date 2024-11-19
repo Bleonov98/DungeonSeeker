@@ -529,6 +529,13 @@ void Game::ProcessCollisions(float dt)
             player->Push(i->GetPos());
         }
     }
+        // items
+    for (auto i : itemList)
+    {
+        if (player->ObjectCollision(*i)) {
+            player->AddToInventory(i);
+        }
+    }
 
     // projectile collisions
     for (auto proj : projectileList)
@@ -702,42 +709,9 @@ void Game::UpdateEnemies(float dt)
     }
 }
 
-void Game::DeleteObjects()
+void Game::ShowPlayerStats() 
 {
-    EraseFromVector(enemyList);
-    EraseFromVector(vampireList);
-    EraseFromVector(projectileList);
-    
-    EraseFromVector(animObjList);
-    EraseFromVector(objList);
-}
-
-// utility
-int Game::GetRandomNumber(int min, int max)
-{
-    int pseudoRandNum = 0;
-    static int number = 0;
-
-    if (number > 14 + rand() % 10) {
-        number = 0;
-        pseudoRandNum = min + rand() % (max - min);
-    }
-    else {
-        pseudoRandNum = min;
-    }
-
-    number++;
-    return pseudoRandNum;
-}
-
-template<typename T>
-void Game::EraseFromVector(std::vector<std::shared_ptr<T>>& vector) 
-{
-    vector.erase(
-        std::remove_if(vector.begin(), vector.end(),
-            [](const std::shared_ptr<T>& obj) { return obj->IsDeleted(); }),
-        vector.end()
-    );
+    DrawTexture(ResourceManager::GetTexture("statsTexture"), glm::vec2(25.0f), glm::vec2(250.0f, 100.0f));
 }
 
 // render
@@ -754,6 +728,8 @@ void Game::Render()
     DrawObject(projectileList);
     DrawObject(itemList);
     DrawObject(player);
+
+    ShowPlayerStats();
 
 #ifdef _TESTING
     dungeon->DrawDungeon();
@@ -776,7 +752,7 @@ void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size) // m
 
     ResourceManager::GetShader("menuShader").SetMatrix4("model", model);
     renderer->DrawTexture(texture);
-} 
+}
 
 void Game::DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects)
 {
@@ -851,8 +827,46 @@ void Game::DrawObject(std::shared_ptr<T> object)
     ResourceManager::GetShader("spriteShader").SetBool("instanced", false);
     if (gmState != ACTIVE) ResourceManager::GetShader("spriteShader").SetBool("menu", true);
     else ResourceManager::GetShader("spriteShader").SetBool("menu", false);
-    
+
     renderer->DrawTexture(ResourceManager::GetTexture(object->GetTextureName()));
+}
+
+// utility
+int Game::GetRandomNumber(int min, int max)
+{
+    int pseudoRandNum = 0;
+    static int number = 0;
+
+    if (number > 14 + rand() % 10) {
+        number = 0;
+        pseudoRandNum = min + rand() % (max - min);
+    }
+    else {
+        pseudoRandNum = min;
+    }
+
+    number++;
+    return pseudoRandNum;
+}
+
+template<typename T>
+void Game::EraseFromVector(std::vector<std::shared_ptr<T>>& vector) 
+{
+    vector.erase(
+        std::remove_if(vector.begin(), vector.end(),
+            [](const std::shared_ptr<T>& obj) { return obj->IsDeleted(); }),
+        vector.end()
+    );
+}
+
+void Game::DeleteObjects()
+{
+    EraseFromVector(enemyList);
+    EraseFromVector(vampireList);
+    EraseFromVector(projectileList);
+
+    EraseFromVector(animObjList);
+    EraseFromVector(objList);
 }
 
 Game::~Game()

@@ -9,7 +9,7 @@ class Enemy : public Character
 {
 public:
 	Enemy(glm::vec2 position, glm::vec2 size, float speed, std::vector<DropEntry> drop) :Character(position, size, speed) {
-		hp = 10.0f;
+		maxHealth = hp = 10.0f;
 		damage = 5.0f;
 		this->drop = drop;
 	};
@@ -32,7 +32,7 @@ class Skeleton : public Enemy
 {
 public:
 	Skeleton(glm::vec2 position, glm::vec2 size, float speed, std::vector<DropEntry> drop) : Enemy(position, size, speed, drop) {
-		hp = 15.0f;
+		maxHealth = hp = 15.0f;
 		armor = 2.5f;
 	};
 };
@@ -42,7 +42,7 @@ class Skull : public Enemy
 public:
 	Skull(glm::vec2 position, glm::vec2 size, float speed, std::vector<DropEntry> drop) : Enemy(position, size, speed, drop) {
 		atkType = MAGICAL;
-		hp = 10;
+		maxHealth = hp = 10;
 		resist = 5.0f;
 	};
 	void Move(glm::vec2 playerPos, float dt) override;
