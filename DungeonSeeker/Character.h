@@ -14,11 +14,6 @@ enum ActionState {
 	ATTACK
 };
 
-struct StatusBar
-{
-	glm::vec2 size, position;
-};
-
 class Character : public DynamicObject
 {
 public:
@@ -49,7 +44,6 @@ public:
 
 protected:
 
-	StatusBar healthBar;
 	AttackType attackType = PHYSICAL;
 	ActionState aState = IDLE;
 

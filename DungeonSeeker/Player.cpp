@@ -65,17 +65,13 @@ void Player::LevelUp(float experience)
 		lvl++;
 		exp -= expThreshold;
 
-		hp += 1.0f;
+		hp = maxHealth += 1.0f;
 		damage += 2.5f;
 		armor += 1.0f;
 		resist += 0.5f;
-	}
-}
 
-void Player::AddToInventory(std::shared_ptr<Item> item)
-{
-	item->Hide();
-	inventory.push_back(item);
+		expThreshold += 25.0f;
+	}
 }
 
 void Player::UpdateAABB()

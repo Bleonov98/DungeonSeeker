@@ -11,12 +11,15 @@ enum PotionSize {
 class Potion : public Item
 {
 public:
-	Potion(glm::vec2 position, glm::vec2 size, PotionSize pSize) : Item(position, size) {};
+	Potion(glm::vec2 position, glm::vec2 size, PotionSize pSize) : Item(position, size) {
+		this->pSize = pSize;
+	};
 	virtual void Use() = 0;
 
 	virtual void InitPotionData(std::string texSize) = 0;
-		
+	PotionSize GetPotionSize() { return pSize; }
 protected:
+	PotionSize pSize;
 	float duration, durationTime = 0.0f;
 };
 

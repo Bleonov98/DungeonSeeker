@@ -22,18 +22,18 @@ public:
 	bool AttackCollision(std::shared_ptr<Enemy> enemy);
 
 	void LevelUp(float experience);
-	void AddToInventory(std::shared_ptr<Item> item);
+	void AddToInventory(std::shared_ptr<Item> item) { inventory.push_back(item); }
 	std::vector<std::shared_ptr<Item>> GetInventory() { return this->inventory; }
 
 	void UpdateAABB() override;
 
 	// 
 	int GetLvl() { return lvl; }
-
+	float GetExpPercentage() { return exp / expThreshold; }
+	float GetHpPercentage() { return hp / maxHealth; }
 private:
 
 	// attack
-	StatusBar expBar;
 	AABB daggerhBox;
 	float attackDuration = 0.45f, attackTimer = 0.0f;
 	

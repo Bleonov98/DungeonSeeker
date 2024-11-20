@@ -22,11 +22,9 @@ public:
 	Item(glm::vec2 position, glm::vec2 size) : DynamicObject(position, size) {};
 
 	virtual void Use() = 0;
-	void Hide() { hidden = true; }
 
 protected:
 	ItemID itemID;
-	bool hidden = false;
 };
 
 struct DropEntry

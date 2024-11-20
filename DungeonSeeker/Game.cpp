@@ -3,7 +3,7 @@
 #include <irrklang/irrKlang.h>
 using namespace irrklang;
 
-std::unique_ptr<TextRenderer> text;
+std::unique_ptr<TextRenderer> text, pixelText;
 ISoundEngine* sound = irrklang::createIrrKlangDevice();
 
 std::unique_ptr<Renderer> renderer;
@@ -19,6 +19,9 @@ void Game::Init()
     text = std::make_unique<TextRenderer>(this->width, this->height);
     text->Load("../fonts/Garamond.ttf", 24);
 
+    pixelText = std::make_unique<TextRenderer>(this->width, this->height);
+    pixelText->Load("../fonts/Pixel.ttf", 24);
+
     InitObjects();
     InitTextButtons();
 }
@@ -31,6 +34,13 @@ void Game::LoadResources()
     // textures
     ResourceManager::LoadTexture("../textures/main/menu.png", true, "menuTexture");
     ResourceManager::LoadTexture("../textures/main/cursor.png", true, "cursorTexture");
+
+    // status bar
+    ResourceManager::LoadTexture("../textures/main/healthBar.png", true, "healthBarTexture");
+    ResourceManager::LoadTexture("../textures/main/healthBarWrap.png", true, "healthBarWrapTexture");
+    ResourceManager::LoadTexture("../textures/main/expBar.png", true, "expBarTexture");
+    ResourceManager::LoadTexture("../textures/main/expBarWrap.png", true, "expBarWrapTexture");
+    ResourceManager::LoadTexture("../textures/main/inventory.png", true, "inventoryTexture");
 
     // map
     ResourceManager::LoadTexture("../textures/map/main_tile.png", true, "mainTile");
@@ -530,11 +540,14 @@ void Game::ProcessCollisions(float dt)
         }
     }
         // items
-    for (auto i : itemList)
+    for (auto it = itemList.begin(); it != itemList.end();) 
     {
-        if (player->ObjectCollision(*i)) {
-            player->AddToInventory(i);
+        if (player->ObjectCollision(**it)) {
+            player->AddToInventory(*it);    
+            it = itemList.erase(it);        
         }
+        else
+            ++it;
     }
 
     // projectile collisions
@@ -711,7 +724,28 @@ void Game::UpdateEnemies(float dt)
 
 void Game::ShowPlayerStats() 
 {
-    DrawTexture(ResourceManager::GetTexture("statsTexture"), glm::vec2(25.0f), glm::vec2(250.0f, 100.0f));
+    DrawTexture(ResourceManager::GetTexture("menuTexture"), glm::vec2(25.0f), glm::vec2(250.0f, 135.0f));
+
+    DrawTexture(ResourceManager::GetTexture("healthBarWrapTexture"), glm::vec2(60.0f, 40.0f), glm::vec2(180.0f, 50.0f));
+    DrawTexture(ResourceManager::GetTexture("healthBarTexture"), glm::vec2(110.0f, 57.0f), glm::vec2(player->GetHpPercentage() * 118.0f, 15.0f));
+
+    DrawTexture(ResourceManager::GetTexture("expBarWrapTexture"), glm::vec2(60.0f, 95.0f), glm::vec2(180.0f, 50.0f));
+    DrawTexture(ResourceManager::GetTexture("expBarTexture"), glm::vec2(110.0f, 112.0f), glm::vec2(player->GetExpPercentage() * 118.0f, 15.0f));
+
+    pixelText->RenderText(std::to_string(player->GetLvl()), glm::vec2(81.0f, 112.0f), 1.0f);
+
+    DrawTexture(ResourceManager::GetTexture("inventoryTexture"), glm::vec2(400.0f, height - 100.0f), glm::vec2(width / 2.0f, 75.0f));
+}
+
+void Game::ShowPlayerInventory() 
+{
+    std::vector<std::shared_ptr<Item>> inv = player->GetInventory();
+    size_t invSize = inv.size();
+
+    for (size_t i = 0; i < invSize; i++)
+    {   
+
+    }
 }
 
 // render
