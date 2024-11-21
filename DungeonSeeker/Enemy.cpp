@@ -37,18 +37,14 @@ std::vector<std::shared_ptr<Item>> Enemy::GetLoot()
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_int_distribution<> dis(0, 100);
-	std::uniform_int_distribution<> randIt(1, 2); // amount of items
 
-	int itemAmount = randIt(gen), increasedRate = 2 * multiplier;
-	for (size_t i = 0; i < itemAmount; i++)
-	{
-		int num = dis(gen);
-		if (num > 10 + increasedRate) num -= increasedRate; // multiplier doesn't work for rare+ items
-		for (const auto& entry : drop) {
-			if (num <= entry.dropChance) {
-				itemIDs.push_back(entry.itemID);
-				break;
-			}
+	int increasedRate = 2 * multiplier;
+	int num = dis(gen);
+	if (num > 10 + increasedRate) num -= increasedRate; // multiplier doesn't work for rare+ items
+	for (const auto& entry : drop) {
+		if (num <= entry.dropChance) {
+			itemIDs.push_back(entry.itemID);
+			break;
 		}
 	}
 
@@ -56,37 +52,44 @@ std::vector<std::shared_ptr<Item>> Enemy::GetLoot()
 	if (loot.empty()) multiplier++;
 	else multiplier = 0;
 
-	// size of item
-	std::uniform_real_distribution<> sizeDis(0.0, 1.0);
-	PotionSize pSize;
-	(sizeDis(gen) > 0.5f) ? pSize = SMALL : pSize = BIG;
-
 	std::shared_ptr<Item> item;
 	for (auto i : itemIDs)
 	{
 		switch (i)
 		{
-		case ItemID::HP_POTION:
+		case ItemID::smallHealthPotion:
 		{
-			std::shared_ptr<HealthPotion> hpPotion = std::make_shared<HealthPotion>(position, size / 2.0f, pSize);
+			std::shared_ptr<HealthPotion> hpPotion = std::make_shared<HealthPotion>(position, size / 2.0f, PotionSize::SMALL);
 			item = hpPotion;
 		}
 		break;
-		case ItemID::MS_POTION:
+		case ItemID::healthPotion:
 		{
-			std::shared_ptr<MSPotion> msPotion = std::make_shared<MSPotion>(position, size / 2.0f, pSize);
+			std::shared_ptr<HealthPotion> hpPotion = std::make_shared<HealthPotion>(position, size / 2.0f, PotionSize::BIG);
+			item = hpPotion;
+		}
+		break;
+		case ItemID::smallMsPotion:
+		{
+			std::shared_ptr<MSPotion> msPotion = std::make_shared<MSPotion>(position, size / 2.0f, PotionSize::SMALL);
 			item = msPotion;
 		}
 		break;
-		case ItemID::STAT_UPGRADE:
+		case ItemID::msPotion:
 		{
-			std::shared_ptr<StatsUpgrade> statsUpgrade = std::make_shared<StatsUpgrade>(position, size / 2.0f);
+			std::shared_ptr<MSPotion> msPotion = std::make_shared<MSPotion>(position, size / 2.0f, PotionSize::BIG);
+			item = msPotion;
+		}
+		break;
+		case ItemID::statsUpgrade:
+		{
+			std::shared_ptr<Upgrade> statsUpgrade = std::make_shared<Upgrade>(position, size / 2.0f, UpgradeType::UpgradeStats);
 			item = statsUpgrade;
 		}
 		break;
-		case ItemID::TYPE_UPGRADE:
+		case ItemID::typeUpgrade:
 		{
-			std::shared_ptr<DamageTypeUpgrade> typeUpgrade = std::make_shared<DamageTypeUpgrade>(position, size / 2.0f);
+			std::shared_ptr<Upgrade> typeUpgrade = std::make_shared<Upgrade>(position, size / 2.0f, UpgradeType::UpgradeType);
 			item = typeUpgrade;
 		}
 		break;

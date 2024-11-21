@@ -202,6 +202,16 @@ void Game::GenerateDungeon()
         }
     }
     player->SetPos(playerPos);
+
+    std::shared_ptr<HealthPotion> hpPotion = std::make_shared<HealthPotion>(player->GetPos() + player->GetSize() + 50.0f, glm::vec2(), PotionSize::SMALL);
+    objList.push_back(hpPotion);
+    animObjList.push_back(hpPotion);
+    itemList.push_back(hpPotion);
+
+    hpPotion = std::make_shared<HealthPotion>(player->GetPos() + player->GetSize() + 50.0f, glm::vec2(), PotionSize::BIG);
+    objList.push_back(hpPotion);
+    animObjList.push_back(hpPotion);
+    itemList.push_back(hpPotion);
 }
 
 void Game::GenerateLevel()
@@ -544,7 +554,8 @@ void Game::ProcessCollisions(float dt)
     {
         if (player->ObjectCollision(**it)) {
             player->AddToInventory(*it);    
-            it = itemList.erase(it);        
+            (*it)->DeleteObject(); 
+            break;
         }
         else
             ++it;
@@ -619,22 +630,30 @@ std::vector<DropEntry> Game::GetItemsByRarity(ItemRarity rarity)
     DropEntry items;
 
     if (rarity == ItemRarity::UNIQUE) {
-        items.itemID = ItemID::TYPE_UPGRADE;
+        items.itemID = ItemID::typeUpgrade;
         items.dropChance = 1;
         drop.push_back(items);
     }
     else if (rarity == ItemRarity::RARE)
     {
-        items.itemID = ItemID::STAT_UPGRADE;
+        items.itemID = ItemID::statsUpgrade;
         items.dropChance = 10;
         drop.push_back(items);
-    }
 
-    items.itemID = ItemID::MS_POTION;
+        items.itemID = ItemID::msPotion;
+        items.dropChance = 15;
+        drop.push_back(items);
+
+        items.itemID = ItemID::healthPotion;
+        items.dropChance = 25;
+        drop.push_back(items);
+    }
+    
+    items.itemID = ItemID::smallMsPotion;
     items.dropChance = 20;
     drop.push_back(items);
 
-    items.itemID = ItemID::HP_POTION;
+    items.itemID = ItemID::smallHealthPotion;
     items.dropChance = 30;
     drop.push_back(items);
 
@@ -733,18 +752,18 @@ void Game::ShowPlayerStats()
     DrawTexture(ResourceManager::GetTexture("expBarTexture"), glm::vec2(110.0f, 112.0f), glm::vec2(player->GetExpPercentage() * 118.0f, 15.0f));
 
     pixelText->RenderText(std::to_string(player->GetLvl()), glm::vec2(81.0f, 112.0f), 1.0f);
-
-    DrawTexture(ResourceManager::GetTexture("inventoryTexture"), glm::vec2(400.0f, height - 100.0f), glm::vec2(width / 2.0f, 75.0f));
 }
 
 void Game::ShowPlayerInventory() 
 {
-    std::vector<std::shared_ptr<Item>> inv = player->GetInventory();
-    size_t invSize = inv.size();
+    DrawTexture(ResourceManager::GetTexture("inventoryTexture"), glm::vec2(400.0f, height - 100.0f), glm::vec2(width / 2.0f, 75.0f));
 
-    for (size_t i = 0; i < invSize; i++)
-    {   
-
+    int cnt = 0;
+    for (auto &i : player->GetInventory().GetItems())
+    {
+        DrawTexture(ResourceManager::GetTexture(i.second.textureName), glm::vec2(435.0f + cnt * 76.0f, height - 80.0f), glm::vec2(50.0f));
+        pixelText->RenderText(std::to_string(i.second.cnt), glm::vec2(470.0f + cnt * 80.0f, height - 50.0f), 0.6f);
+        cnt++;
     }
 }
 
@@ -764,6 +783,7 @@ void Game::Render()
     DrawObject(player);
 
     ShowPlayerStats();
+    ShowPlayerInventory();
 
 #ifdef _TESTING
     dungeon->DrawDungeon();
@@ -898,6 +918,8 @@ void Game::DeleteObjects()
     EraseFromVector(enemyList);
     EraseFromVector(vampireList);
     EraseFromVector(projectileList);
+
+    EraseFromVector(itemList);
 
     EraseFromVector(animObjList);
     EraseFromVector(objList);

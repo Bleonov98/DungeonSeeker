@@ -4,6 +4,7 @@
 #include "Character.h"
 #include "Enemy.h"
 #include "Item.h"
+#include "Inventory.h"
 
 class Player : public Character 
 {
@@ -22,8 +23,10 @@ public:
 	bool AttackCollision(std::shared_ptr<Enemy> enemy);
 
 	void LevelUp(float experience);
-	void AddToInventory(std::shared_ptr<Item> item) { inventory.push_back(item); }
-	std::vector<std::shared_ptr<Item>> GetInventory() { return this->inventory; }
+	void Heal(float healRate);
+	void SpeedUp(float speedRate);
+	void AddToInventory(std::shared_ptr<Item> item) { inventory.AddItem(item); }
+	Inventory& GetInventory() { return this->inventory; }
 
 	void UpdateAABB() override;
 
@@ -34,13 +37,13 @@ public:
 private:
 
 	// attack
+	Inventory inventory;
 	AABB daggerhBox;
 	float attackDuration = 0.45f, attackTimer = 0.0f;
 	
 	float exp = 0.0f, expThreshold = 50.0f;
 	int lvl = 1;
 
-	std::vector<std::shared_ptr<Item>> inventory;
 
 };
 

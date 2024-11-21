@@ -58,9 +58,6 @@
     <ClCompile Include="Potion.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="Upgrade.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h">
@@ -115,6 +112,9 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Upgrade.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Inventory.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

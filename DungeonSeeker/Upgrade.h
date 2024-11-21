@@ -3,36 +3,20 @@
 
 #include "Item.h"
 
+enum class UpgradeType {
+	UpgradeStats,
+	UpgradeType
+};
+
 class Upgrade : public Item
 {
 public:
-	Upgrade(glm::vec2 position, glm::vec2 size) : Item(position, size) {};
-	virtual void Use() = 0;
-protected:
-
-};
-
-class StatsUpgrade : public Upgrade 
-{
-public:
-	StatsUpgrade(glm::vec2 position, glm::vec2 size) : Upgrade(position, size) {
-		itemID = ItemID::STAT_UPGRADE;
+	Upgrade(glm::vec2 position, glm::vec2 size, UpgradeType type) : Item(position, size) {
+		if (type == UpgradeType::UpgradeStats)
+			itemID = ItemID::statsUpgrade;
+		else if (type == UpgradeType::UpgradeType)
+			itemID = ItemID::typeUpgrade;
 	};
-	void Use() override;
-private:
-
-};
-
-class DamageTypeUpgrade : public Upgrade 
-{
-public:
-
-	DamageTypeUpgrade(glm::vec2 position, glm::vec2 size) : Upgrade(position, size) {
-		itemID = ItemID::TYPE_UPGRADE;
-	};
-	void Use() override;
-private:
-	
 };
 
 #endif // !UPGRADE_H

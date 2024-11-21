@@ -2,10 +2,12 @@
 #define ITEM_H
 
 enum class ItemID {
-	HP_POTION = 0,
-	MS_POTION = 1,
-	STAT_UPGRADE = 10,
-	TYPE_UPGRADE = 11
+	smallHealthPotion = 0,
+	healthPotion = 1,
+	smallMsPotion = 2,
+	msPotion = 3,
+	statsUpgrade = 10,
+	typeUpgrade = 11
 };
 
 #include "DynamicObject.h"
@@ -20,9 +22,7 @@ class Item : public DynamicObject
 {
 public:
 	Item(glm::vec2 position, glm::vec2 size) : DynamicObject(position, size) {};
-
-	virtual void Use() = 0;
-
+	ItemID GetID() { return itemID; }
 protected:
 	ItemID itemID;
 };
