@@ -41,6 +41,17 @@ void Player::ProcessAction(float dt)
 			attackTimer = 0.0f;
 		}
 	}
+
+	if (speedUpEffectDuration > 0.0f) {
+		speedUpEffectDuration -= dt;
+		effectDuration = speedUpEffectDuration;
+	}
+	else {
+		speedUpEffectDuration = 0.0f;
+
+		speed = baseSpeed;
+		effect = Effects::none;
+	}
 }
 
 void Player::Attack()
@@ -74,9 +85,70 @@ void Player::LevelUp(float experience)
 	}
 }
 
+void Player::UseItem(int keyIndex)
+{
+	int invIndex = 0;
+	for (auto i : inventory.GetItems())
+	{
+		if (invIndex == keyIndex)
+		{
+			if (inventory.RemoveItem(i.first)) 
+			{
+				itemHandlers.find(i.first)->second();
+			}
+			break;
+		}
+		invIndex++;
+	}
+}
+
 void Player::UpdateAABB()
 {
 	hBox.SetBorder(glm::vec2(position.x + size.x / 3.0f, position.y + size.y / 2.5f), position + size - glm::vec2(size.x / 3.0f, 0));
 	if (flipHorizontally) daggerhBox.SetBorder(glm::vec2(position.x, position.y + size.y / 2.5f), position + glm::vec2(size.x / 2.0f, size.y));
 	else daggerhBox.SetBorder(glm::vec2(position.x + size.x / 2.0f, position.y + size.y / 2.5f), position + size);
+}
+
+// effects
+void Player::ApplySmallHealthPotion() {
+	hp += maxHealth * 0.35f;
+	if (hp > maxHealth) hp = maxHealth;
+}
+
+void Player::ApplyHealthPotion()
+{
+	hp += maxHealth * 0.75f;
+	if (hp > maxHealth) hp = maxHealth;
+}
+
+void Player::ApplySmallMsPotion()
+{
+	if (effect != Effects::smallSpeedUpEffect) 
+	{
+		speedUpEffectDuration = 0.0f;
+		speed = baseSpeed;
+		speed += 50.0f;
+		effect = Effects::smallSpeedUpEffect;
+	}
+	speedUpEffectDuration += 40.0f;
+}
+
+void Player::ApplyMsPotion()
+{
+	if (effect != Effects::speedUpEffect)
+	{
+		speedUpEffectDuration = 0.0f;
+		speed = baseSpeed;
+		speed += 100.0f;
+		effect = Effects::speedUpEffect;
+	}
+	speedUpEffectDuration += 60.0f;
+}
+
+void Player::ApplyStatsUpgrade()
+{
+	hp = maxHealth += 1.0f;
+	resist += 0.5f;
+	armor += 0.5f;
+	damage += 1.0f;
 }

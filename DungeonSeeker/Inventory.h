@@ -20,10 +20,14 @@ public:
         items[item->GetID()].textureName.push_back('0');
     }
 
-    void RemoveItem(ItemID type) {
+    bool RemoveItem(ItemID type) {
         if (items[type].cnt > 0) {
             items[type].cnt--;
+            if (items[type].cnt <= 0)
+                items.erase(type);
+            return true;
         }
+        return false;
     }
 
     int GetItemCount(ItemID type) const {

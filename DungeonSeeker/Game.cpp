@@ -203,15 +203,10 @@ void Game::GenerateDungeon()
     }
     player->SetPos(playerPos);
 
-    std::shared_ptr<HealthPotion> hpPotion = std::make_shared<HealthPotion>(player->GetPos() + player->GetSize() + 50.0f, glm::vec2(), PotionSize::SMALL);
-    objList.push_back(hpPotion);
-    animObjList.push_back(hpPotion);
-    itemList.push_back(hpPotion);
-
-    hpPotion = std::make_shared<HealthPotion>(player->GetPos() + player->GetSize() + 50.0f, glm::vec2(), PotionSize::BIG);
-    objList.push_back(hpPotion);
-    animObjList.push_back(hpPotion);
-    itemList.push_back(hpPotion);
+    std::shared_ptr<MSPotion> msPotion = std::make_shared<MSPotion>(player->GetPos() + player->GetSize() + 50.0f, glm::vec2(), PotionSize::SMALL);
+    objList.push_back(msPotion);
+    animObjList.push_back(msPotion);
+    itemList.push_back(msPotion);
 }
 
 void Game::GenerateLevel()
@@ -431,39 +426,92 @@ void Game::SetTile()
 }
 
 // main
+void Game::ProcessInventoryKeys()
+{
+    if (KeysProcessed[GLFW_KEY_1] || KeysProcessed[GLFW_KEY_2] || KeysProcessed[GLFW_KEY_3] || KeysProcessed[GLFW_KEY_4] || KeysProcessed[GLFW_KEY_5]
+        || KeysProcessed[GLFW_KEY_6] || KeysProcessed[GLFW_KEY_7] || KeysProcessed[GLFW_KEY_8] || KeysProcessed[GLFW_KEY_9]) return;
+
+    if (Keys[GLFW_KEY_1]) {
+        player->UseItem(0);
+        KeysProcessed[GLFW_KEY_1] = true;
+    }
+    else if (Keys[GLFW_KEY_2]) {
+        player->UseItem(1);
+        KeysProcessed[GLFW_KEY_2] = true;
+    }
+    else if (Keys[GLFW_KEY_3]) {
+        player->UseItem(2);
+        KeysProcessed[GLFW_KEY_3] = true;
+    }
+    else if (Keys[GLFW_KEY_4]) {
+        player->UseItem(3);
+        KeysProcessed[GLFW_KEY_4] = true;
+    }
+    else if (Keys[GLFW_KEY_5]) {
+        player->UseItem(4);
+        KeysProcessed[GLFW_KEY_5] = true;
+    }
+    else if (Keys[GLFW_KEY_6]) {
+        player->UseItem(5);
+        KeysProcessed[GLFW_KEY_6] = true;
+    }
+    else if (Keys[GLFW_KEY_7]) {
+        player->UseItem(6);
+        KeysProcessed[GLFW_KEY_7] = true;
+    }
+    else if (Keys[GLFW_KEY_8]) {
+        player->UseItem(7);
+        KeysProcessed[GLFW_KEY_8] = true;
+    }
+    else if (Keys[GLFW_KEY_9]) {
+        player->UseItem(8);
+        KeysProcessed[GLFW_KEY_9] = true;
+    }
+}
+
 void Game::ProcessInput(float dt)
 {
-    if (this->Keys[GLFW_KEY_ESCAPE] && !this->KeysProcessed[GLFW_KEY_ESCAPE] && (gmState == MENU || gmState == ACTIVE)) {
-       
+    if (this->Keys[GLFW_KEY_ESCAPE] && !this->KeysProcessed[GLFW_KEY_ESCAPE] && (gmState == MENU || gmState == ACTIVE)) 
+    {
         gmState == ACTIVE ? gmState = MENU : gmState = ACTIVE;
 
         this->KeysProcessed[GLFW_KEY_ESCAPE] = true;
     }
 
-    if (gmState == ACTIVE) {
+    if (gmState == ACTIVE)
+    {
         // Move screen
         float midScreenX = player->GetPos().x - this->width / 2.0f + player->GetSize().x / 2.0f;
         float midScreenY = player->GetPos().y - this->height / 2.0f + player->GetSize().y / 2.0f;
         camera.cameraPos = glm::vec3(midScreenX, midScreenY, 1.0f);
         if (camera.cameraPos.x < 0.0f) camera.cameraPos.x = 0.0f;
         if (camera.cameraPos.y < 0.0f) camera.cameraPos.y = 0.0f;
- 
-        if (Keys[GLFW_KEY_W]) 
+
+        // player movement
+        if (Keys[GLFW_KEY_W])
             player->Move(DIR_UP, dt);
-        else if (Keys[GLFW_KEY_S]) 
+        else if (Keys[GLFW_KEY_S])
             player->Move(DIR_DOWN, dt);
 
-        if (Keys[GLFW_KEY_A]) 
+        if (Keys[GLFW_KEY_A])
             player->Move(DIR_LEFT, dt);
-        else if (Keys[GLFW_KEY_D]) 
+        else if (Keys[GLFW_KEY_D])
             player->Move(DIR_RIGHT, dt);
 
         if (mouseKeys[GLFW_MOUSE_BUTTON_LEFT] && !mouseKeysProcessed[GLFW_MOUSE_BUTTON_LEFT]) {
             player->Attack();
             mouseKeysProcessed[GLFW_MOUSE_BUTTON_LEFT] = true;
         }
+
+        ProcessInventoryKeys();
+
+        if (Keys[GLFW_KEY_I] && !KeysProcessed[GLFW_KEY_I]) {
+            statusShow = !statusShow;
+            KeysProcessed[GLFW_KEY_I] = true;
+        }
     }
-    else if (gmState == MENU) {
+    else if (gmState == MENU) 
+    {
         for (auto i : menuButtons)
         {
             if (i->TextCollision(xMouse, yMouse)) {
@@ -476,7 +524,8 @@ void Game::ProcessInput(float dt)
             else i->SetTextColour(glm::vec3(0.4f));
         }
     }
-    else if (gmState == SETTINGS) {
+    else if (gmState == SETTINGS) 
+    {
         for (auto i : settingButtons)
         {
             if (i->TextCollision(xMouse, yMouse)) {
@@ -741,8 +790,10 @@ void Game::UpdateEnemies(float dt)
     }
 }
 
-void Game::ShowPlayerStats() 
+// render
+void Game::ShowPlayerStatusBar()
 {
+    // Status bars
     DrawTexture(ResourceManager::GetTexture("menuTexture"), glm::vec2(25.0f), glm::vec2(250.0f, 135.0f));
 
     DrawTexture(ResourceManager::GetTexture("healthBarWrapTexture"), glm::vec2(60.0f, 40.0f), glm::vec2(180.0f, 50.0f));
@@ -752,14 +803,24 @@ void Game::ShowPlayerStats()
     DrawTexture(ResourceManager::GetTexture("expBarTexture"), glm::vec2(110.0f, 112.0f), glm::vec2(player->GetExpPercentage() * 118.0f, 15.0f));
 
     pixelText->RenderText(std::to_string(player->GetLvl()), glm::vec2(81.0f, 112.0f), 1.0f);
+
+    // Effects
+    if (player->GetEffect() == Effects::none) return;
+    
+    int duration = player->GetEffectDuration();
+
+    if (player->GetEffect() == Effects::smallSpeedUpEffect || player->GetEffect() == Effects::speedUpEffect) {
+        DrawTexture(ResourceManager::GetTexture("msPotion0"), glm::vec2(280.0f, 25.0f), glm::vec2(50.0f));
+        pixelText->RenderText(std::to_string(duration), glm::vec2(325.0f, 60.0f), 0.65f);
+    }
 }
 
-void Game::ShowPlayerInventory() 
+void Game::ShowPlayerInventory()
 {
     DrawTexture(ResourceManager::GetTexture("inventoryTexture"), glm::vec2(400.0f, height - 100.0f), glm::vec2(width / 2.0f, 75.0f));
 
     int cnt = 0;
-    for (auto &i : player->GetInventory().GetItems())
+    for (auto& i : player->GetInventory().GetItems())
     {
         DrawTexture(ResourceManager::GetTexture(i.second.textureName), glm::vec2(435.0f + cnt * 76.0f, height - 80.0f), glm::vec2(50.0f));
         pixelText->RenderText(std::to_string(i.second.cnt), glm::vec2(470.0f + cnt * 80.0f, height - 50.0f), 0.6f);
@@ -767,38 +828,24 @@ void Game::ShowPlayerInventory()
     }
 }
 
-// render
-void Game::Render()
+void Game::ShowPlayerStats() 
 {
-    view = glm::lookAt(camera.cameraPos, camera.cameraPos + camera.cameraFront, camera.cameraUp);
+    glm::vec2 size = glm::vec2(250.0f, 100.0f);
+    float pos = width / 2 - size.x / 2;
 
-    // background/map/stats
-    DrawMapObject(mainTileList);
-    DrawObject(mapObjList);
-
-    // objects
-    DrawObject(enemyList);
-    DrawObject(projectileList);
-    DrawObject(itemList);
-    DrawObject(player);
-
-    ShowPlayerStats();
-    ShowPlayerInventory();
-
-#ifdef _TESTING
-    dungeon->DrawDungeon();
-#endif
-
-    if (gmState == MENU) Menu();
-    else if (gmState == SETTINGS) Settings();
-
-    if (gmState != ACTIVE) DrawTexture(ResourceManager::GetTexture("cursorTexture"), glm::vec2(xMouse, yMouse), glm::vec2(30.0f, 32.0f));
+    DrawTexture(ResourceManager::GetTexture("menuTexture"), glm::vec2(pos, 25.0f), size);
+    pixelText->RenderText("Damage: " + std::to_string(static_cast<int>(player->GetDamage())), glm::vec2(pos + 80.0f, 50.0f), 0.6f);
+    pixelText->RenderText("Armor: " + std::to_string(static_cast<int>(player->GetArmor())), glm::vec2(pos + 80.0f, 70.0f), 0.6f);
+    pixelText->RenderText("Resist: " + std::to_string(static_cast<int>(player->GetResist())), glm::vec2(pos + 80.0f, 90.0f), 0.6f);
 }
-
-void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size) // menu texture
+    // -----------
+void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size, float transparency, glm::vec3 colour) // menu texture
 {
     ResourceManager::GetShader("menuShader").Use();
     ResourceManager::GetShader("menuShader").SetMatrix4("projection", projection);
+
+    ResourceManager::GetShader("menuShader").SetVector3f("colour", colour);
+    ResourceManager::GetShader("menuShader").SetFloat("transparency", transparency);
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(position, 0.0f));
@@ -883,6 +930,34 @@ void Game::DrawObject(std::shared_ptr<T> object)
     else ResourceManager::GetShader("spriteShader").SetBool("menu", false);
 
     renderer->DrawTexture(ResourceManager::GetTexture(object->GetTextureName()));
+}
+    // -----------
+void Game::Render()
+{
+    view = glm::lookAt(camera.cameraPos, camera.cameraPos + camera.cameraFront, camera.cameraUp);
+
+    // background/map/stats
+    DrawMapObject(mainTileList);
+    DrawObject(mapObjList);
+
+    // objects
+    DrawObject(enemyList);
+    DrawObject(projectileList);
+    DrawObject(itemList);
+    DrawObject(player);
+
+    ShowPlayerStatusBar();
+    ShowPlayerInventory();
+    if (statusShow) ShowPlayerStats();
+
+#ifdef _TESTING
+    dungeon->DrawDungeon();
+#endif
+
+    if (gmState == MENU) Menu();
+    else if (gmState == SETTINGS) Settings();
+
+    if (gmState != ACTIVE) DrawTexture(ResourceManager::GetTexture("cursorTexture"), glm::vec2(xMouse, yMouse), glm::vec2(30.0f, 32.0f));
 }
 
 // utility

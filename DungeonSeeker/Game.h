@@ -77,6 +77,7 @@ public:
 	void InitObjects();
 	void InitTextButtons();
 
+	void ProcessInventoryKeys();
 	void ProcessInput(float dt);
 	void Update(float dt);
 	void UpdateAnimations(float dt);
@@ -91,13 +92,17 @@ public:
 
 	// render
 	void Render();
-	void DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size);
+	void DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size, float transparency = 1.0f, glm::vec3 colour = glm::vec3(1.0f));
 	void DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects);
 	template <typename T>
 	void DrawObject(std::vector<std::shared_ptr<T>> objectVector); // vector of objects with instancing
 	template <typename T>
 	void DrawObject(std::shared_ptr<T> object); // single object without instancing
-
+		// player
+	void ShowPlayerStatusBar();
+	void ShowPlayerInventory();
+	void ShowPlayerStats();
+	
 	void Menu();
 	void Settings();
 
@@ -106,9 +111,7 @@ public:
 		// enemies
 	void SpawnEnemy();
 	void UpdateEnemies(float dt);
-		// player
-	void ShowPlayerStats();
-	void ShowPlayerInventory();
+
 
 	// utility
 	int GetRandomNumber(int min, int max);
@@ -154,9 +157,8 @@ private:
 	std::vector<std::shared_ptr<Item>> itemList;
 
 		// - - - some type
-
+	bool statusShow = false;
 	int width, height;
-
 	GameState gmState = MENU;
 };
 

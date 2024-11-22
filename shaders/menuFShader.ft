@@ -4,8 +4,10 @@ in vec2 TexCoords;
 out vec4 fragColour;
 
 uniform sampler2D image;
+uniform vec3 colour;
+uniform float transparency;
 
 void main()
 {
-	fragColour = texture(image, TexCoords);
+	fragColour = vec4(colour, 1.0f) * texture(image, TexCoords) * transparency;
 }
