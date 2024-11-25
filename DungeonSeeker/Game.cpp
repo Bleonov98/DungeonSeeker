@@ -8,6 +8,8 @@ ISoundEngine* sound = irrklang::createIrrKlangDevice();
 
 std::unique_ptr<Renderer> renderer;
 std::unique_ptr<Dungeon> dungeon;
+std::unique_ptr<GameObject> exit;
+
 std::shared_ptr<Player> player;
 
 void Game::Init()
@@ -41,6 +43,7 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("../textures/main/expBar.png", true, "expBarTexture");
     ResourceManager::LoadTexture("../textures/main/expBarWrap.png", true, "expBarWrapTexture");
     ResourceManager::LoadTexture("../textures/main/inventory.png", true, "inventoryTexture");
+    ResourceManager::LoadTexture("../textures/main/exit.png", true, "exitTexture");
 
     // map
     ResourceManager::LoadTexture("../textures/map/main_tile.png", true, "mainTile");
@@ -132,6 +135,8 @@ void Game::InitObjects()
     // - - - - - - - - - - - - - - - - - -
 
     GenerateDungeon();
+    exit = std::make_unique<GameObject>(glm::vec2(9999.9f, 9999.9f), glm::vec2(50.0f));
+    exit->SetTexture("exitTexture");
 }
 
 void Game::InitTextButtons()
@@ -202,11 +207,6 @@ void Game::GenerateDungeon()
         }
     }
     player->SetPos(playerPos);
-
-    std::shared_ptr<MSPotion> msPotion = std::make_shared<MSPotion>(player->GetPos() + player->GetSize() + 50.0f, glm::vec2(), PotionSize::SMALL);
-    objList.push_back(msPotion);
-    animObjList.push_back(msPotion);
-    itemList.push_back(msPotion);
 }
 
 void Game::GenerateLevel()
@@ -553,6 +553,12 @@ void Game::Update(float dt)
             i->UpdateAABB();
         }
 
+        if (enemyList.empty()) {
+            SpawnExit();
+            GenerateLevel();
+            return;
+        }
+
         // -
         UpdateAnimations(dt);
         ProcessCollisions(dt);
@@ -790,6 +796,12 @@ void Game::UpdateEnemies(float dt)
     }
 }
 
+void Game::SpawnExit() 
+{
+    exit->SetPos(glm::vec2());
+    exit->UpdateAABB();
+}
+
 // render
 void Game::ShowPlayerStatusBar()
 {
@@ -996,6 +1008,7 @@ void Game::DeleteObjects()
 
     EraseFromVector(itemList);
 
+    EraseFromVector(characterList);
     EraseFromVector(animObjList);
     EraseFromVector(objList);
 }

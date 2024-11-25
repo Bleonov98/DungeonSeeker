@@ -68,6 +68,7 @@ void Character::DamageAnimation(float dt)
         colour = glm::vec3(1.0f);
         damageTime = 0.0f;
 
-        if (hp <= 0.0f) isDead = true;
+        if (hp <= 0.0f) 
+            isDead = true;
     }
 }

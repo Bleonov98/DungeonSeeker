@@ -34,8 +34,7 @@ enum TileType {
 enum GameState {
 	MENU,
 	SETTINGS,
-	ACTIVE,
-	PAUSED
+	ACTIVE
 };
 
 struct Grid {
@@ -94,6 +93,7 @@ public:
 	void Render();
 	void DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size, float transparency = 1.0f, glm::vec3 colour = glm::vec3(1.0f));
 	void DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects);
+
 	template <typename T>
 	void DrawObject(std::vector<std::shared_ptr<T>> objectVector); // vector of objects with instancing
 	template <typename T>
@@ -111,7 +111,7 @@ public:
 		// enemies
 	void SpawnEnemy();
 	void UpdateEnemies(float dt);
-
+	void SpawnExit();
 
 	// utility
 	int GetRandomNumber(int min, int max);
