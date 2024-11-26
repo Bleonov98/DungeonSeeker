@@ -244,7 +244,7 @@ Room* Dungeon::FindRoomInSubtree(DungeonNode* leaf, glm::vec2 midPoint)
 }
 
 #ifdef _TESTING
-void Dungeon::DrawDungeon()
+void Dungeon::DrawDungeon(glm::vec2 cameraPos)
 {
 	ResourceManager::GetShader("spriteShader").Use();
 	ResourceManager::GetShader("spriteShader").SetMatrix4("projection", glm::ortho(0.0f, static_cast<float>(1600), static_cast<float>(900), 0.0f, -1.0f, 1.0f));
@@ -260,7 +260,7 @@ void Dungeon::DrawDungeon()
 		ResourceManager::GetShader("spriteShader").SetVector3f("uColour", glm::vec3(0.5f));
 
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(rooms[i].position, 0.0f));
+		model = glm::translate(model, glm::vec3(glm::vec2(cameraPos.x - 800.0f, cameraPos.y - 450.0f) + rooms[i].position, 0.0f));
 		model = glm::scale(model, glm::vec3(rooms[i].width, rooms[i].height, 0.0f));
 
 		ResourceManager::GetShader("spriteShader").SetMatrix4("uModel", model);
@@ -273,7 +273,7 @@ void Dungeon::DrawDungeon()
 		ResourceManager::GetShader("spriteShader").SetVector3f("uColour", glm::vec3(0.5f));
 
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(corridors[i].position, 0.0f));
+		model = glm::translate(model, glm::vec3(glm::vec2(cameraPos.x - 800.0f, cameraPos.y - 450.0f) + corridors[i].position, 0.0f));
 		model = glm::scale(model, glm::vec3(corridors[i].length, corridors[i].width, 0.0f));
 
 		ResourceManager::GetShader("spriteShader").SetMatrix4("uModel", model);

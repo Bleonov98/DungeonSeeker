@@ -8,7 +8,9 @@ ISoundEngine* sound = irrklang::createIrrKlangDevice();
 
 std::unique_ptr<Renderer> renderer;
 std::unique_ptr<Dungeon> dungeon;
-std::unique_ptr<GameObject> exit;
+
+// end game
+std::shared_ptr<ExitObject> exitObj;
 
 std::shared_ptr<Player> player;
 
@@ -44,6 +46,7 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("../textures/main/expBarWrap.png", true, "expBarWrapTexture");
     ResourceManager::LoadTexture("../textures/main/inventory.png", true, "inventoryTexture");
     ResourceManager::LoadTexture("../textures/main/exit.png", true, "exitTexture");
+    ResourceManager::LoadTexture("../textures/main/arrow.png", true, "arrowTexture");
 
     // map
     ResourceManager::LoadTexture("../textures/map/main_tile.png", true, "mainTile");
@@ -128,15 +131,11 @@ void Game::InitObjects()
         player->SetTexture("playerAttack" + std::to_string(i));
     }
     player->AddAnimation("attack", 4, 3, 0.15f);
-
-    objList.push_back(player);
-    animObjList.push_back(player);
-    characterList.push_back(player);
     // - - - - - - - - - - - - - - - - - -
-
+    exitObj = std::make_shared<ExitObject>(glm::vec2(9999.9f, 9999.9f), glm::vec2(50.0f));
+    exitObj->SetTexture("exitTexture");
+    // - - - - - - - - - - - - - - - - - -
     GenerateDungeon();
-    exit = std::make_unique<GameObject>(glm::vec2(9999.9f, 9999.9f), glm::vec2(50.0f));
-    exit->SetTexture("exitTexture");
 }
 
 void Game::InitTextButtons()
@@ -193,6 +192,14 @@ void Game::GenerateDungeon()
 {
     dungeon = std::make_unique<Dungeon>();
     GenerateLevel();
+}
+
+void Game::GenerateLevel()
+{
+    dungeon->GenerateDungeon(width / 10.0f, height / 10.0f);
+    SetGrid();
+    SetTile();
+
     Grid cell(0); // for convenience
 
     // find nearest room to start
@@ -207,13 +214,11 @@ void Game::GenerateDungeon()
         }
     }
     player->SetPos(playerPos);
-}
+    objList.push_back(player);
+    animObjList.push_back(player);
+    characterList.push_back(player);
 
-void Game::GenerateLevel()
-{
-    dungeon->GenerateDungeon(width / 10.0f, height / 10.0f);
-    SetGrid();
-    SetTile();
+    exitObj->exitSpawnPosition = playerPos;
 
     // enemies
     int eCnt = 6 + rand() % 4;
@@ -425,6 +430,21 @@ void Game::SetTile()
     }
 }
 
+void Game::ClearMap()
+{
+    grid.clear();
+    mainTileList.clear();
+    mapObjList.clear();
+
+    objList.clear();
+    animObjList.clear();
+    characterList.clear();
+    enemyList.clear();
+    vampireList.clear();
+    projectileList.clear();
+    itemList.clear();
+}
+
 // main
 void Game::ProcessInventoryKeys()
 {
@@ -553,11 +573,8 @@ void Game::Update(float dt)
             i->UpdateAABB();
         }
 
-        if (enemyList.empty()) {
+        if (enemyList.empty() && !exitSpawned)
             SpawnExit();
-            GenerateLevel();
-            return;
-        }
 
         // -
         UpdateAnimations(dt);
@@ -590,6 +607,17 @@ void Game::ProcessCollisions(float dt)
     {
         if (i == 0) player->ProcessCollision((*mapObjList[i]), true, dt); // bool prevents double collision
         else player->ProcessCollision((*mapObjList[i]), false, dt);
+    }
+        // next level
+    if (player->ObjectCollision(*exitObj))
+    {
+        exitSpawned = false;
+        exitObj->SetPos(glm::vec2(9999.9f, 9999.9f));
+        exitObj->UpdateAABB();
+
+        ClearMap();
+        GenerateDungeon();
+        return;
     }
         // player attack and enemy collision
     for (auto i : enemyList)
@@ -798,8 +826,9 @@ void Game::UpdateEnemies(float dt)
 
 void Game::SpawnExit() 
 {
-    exit->SetPos(glm::vec2());
-    exit->UpdateAABB();
+    exitSpawned = true;
+    exitObj->SetPos(exitObj->exitSpawnPosition);
+    exitObj->UpdateAABB();
 }
 
 // render
@@ -850,8 +879,22 @@ void Game::ShowPlayerStats()
     pixelText->RenderText("Armor: " + std::to_string(static_cast<int>(player->GetArmor())), glm::vec2(pos + 80.0f, 70.0f), 0.6f);
     pixelText->RenderText("Resist: " + std::to_string(static_cast<int>(player->GetResist())), glm::vec2(pos + 80.0f, 90.0f), 0.6f);
 }
+
+void Game::DrawDirectionArrow()
+{
+    glm::vec2 playerCentre = player->GetPos() + player->GetSize() / 2.0f - glm::vec2(camera.cameraPos.x, camera.cameraPos.y);
+    if (glm::distance(player->GetPos(), exitObj->exitSpawnPosition) < 250.0f) return;
+
+    float distance = player->GetSize().x;
+    glm::vec2 exitDirection = glm::normalize(exitObj->exitSpawnPosition - player->GetPos());
+    glm::vec2 position = distance * exitDirection;
+
+    float angle = glm::degrees(atan2(exitDirection.y, exitDirection.x));
+
+    DrawTexture(ResourceManager::GetTexture("arrowTexture"), playerCentre + position, glm::vec2(30.0f), glm::vec3(0.0f, 0.0f, angle - 90.0f));
+}
     // -----------
-void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size, float transparency, glm::vec3 colour) // menu texture
+void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size, glm::vec3 angle, float transparency, glm::vec3 colour) // menu texture
 {
     ResourceManager::GetShader("menuShader").Use();
     ResourceManager::GetShader("menuShader").SetMatrix4("projection", projection);
@@ -861,6 +904,9 @@ void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size, floa
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(position, 0.0f));
+    model = glm::rotate(model, glm::radians(angle.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(angle.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(angle.z), glm::vec3(0.0f, 0.0f, 1.0f));
     model = glm::scale(model, glm::vec3(size, 0.0f));
 
     ResourceManager::GetShader("menuShader").SetMatrix4("model", model);
@@ -951,6 +997,7 @@ void Game::Render()
     // background/map/stats
     DrawMapObject(mainTileList);
     DrawObject(mapObjList);
+    DrawObject(exitObj);
 
     // objects
     DrawObject(enemyList);
@@ -961,9 +1008,14 @@ void Game::Render()
     ShowPlayerStatusBar();
     ShowPlayerInventory();
     if (statusShow) ShowPlayerStats();
+    if (exitSpawned) 
+    {
+        DrawDirectionArrow();
+        pixelText->RenderText("Exit has spawned", glm::vec2(width / 2.0f - 140.0f, 200.0f), 1.25f);
+    }
 
 #ifdef _TESTING
-    dungeon->DrawDungeon();
+    dungeon->DrawDungeon(camera.cameraPos);
 #endif
 
     if (gmState == MENU) Menu();

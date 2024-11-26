@@ -48,7 +48,7 @@ public:
 	std::vector<Corridor> corridors;
 
 #ifdef _TESTING
-	void DrawDungeon();
+	void DrawDungeon(glm::vec2 cameraPos);
 #endif
 
 private:

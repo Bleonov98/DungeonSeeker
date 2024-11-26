@@ -63,4 +63,11 @@ protected:
 	bool isDeleted = false;
 };
 
+struct ExitObject : public GameObject
+{
+	ExitObject(glm::vec2 position, glm::vec2 size, float angle = 0.0f, glm::vec3 colour = glm::vec3(1.0f)) : GameObject(position, size, angle, colour) {};
+	glm::vec2 exitSpawnPosition;
+private:
+};
+
 #endif // !GAMEOBJECT_H

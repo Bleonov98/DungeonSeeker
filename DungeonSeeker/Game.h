@@ -86,12 +86,13 @@ public:
 	// level generation
 	void GenerateDungeon();
 	void GenerateLevel();
+	void ClearMap();
 	void SetGrid();
 	void SetTile();
 
 	// render
 	void Render();
-	void DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size, float transparency = 1.0f, glm::vec3 colour = glm::vec3(1.0f));
+	void DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size, glm::vec3 angle = glm::vec3(0.0f), float transparency = 1.0f, glm::vec3 colour = glm::vec3(1.0f));
 	void DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects);
 
 	template <typename T>
@@ -102,6 +103,7 @@ public:
 	void ShowPlayerStatusBar();
 	void ShowPlayerInventory();
 	void ShowPlayerStats();
+	void DrawDirectionArrow();
 	
 	void Menu();
 	void Settings();
@@ -157,7 +159,7 @@ private:
 	std::vector<std::shared_ptr<Item>> itemList;
 
 		// - - - some type
-	bool statusShow = false;
+	bool statusShow = false, exitSpawned = false;
 	int width, height;
 	GameState gmState = MENU;
 };
