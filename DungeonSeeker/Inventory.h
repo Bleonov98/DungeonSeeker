@@ -16,8 +16,13 @@ public:
 
     void AddItem(std::shared_ptr<Item> item) {
         items[item->GetID()].cnt++;
-        items[item->GetID()].textureName = item->GetTextureName().substr(0, item->GetTextureName().size() - 1);
-        items[item->GetID()].textureName.push_back('0');
+        items[item->GetID()].textureName = item->GetTextureName();
+        
+        if (item->GetTextureName()[item->GetTextureName().size() - 1] >= '0' && item->GetTextureName()[item->GetTextureName().size() - 1] <= '9') // if item has animations
+        {
+            items[item->GetID()].textureName.pop_back();
+            items[item->GetID()].textureName.push_back('0');
+        }
     }
 
     bool RemoveItem(ItemID type) {

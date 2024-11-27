@@ -9,7 +9,7 @@ enum AttackType {
 	PURE
 };
 
-enum ActionState {
+enum class ActionState {
 	IDLE,
 	ATTACK
 };
@@ -45,7 +45,7 @@ public:
 protected:
 
 	AttackType attackType = PHYSICAL;
-	ActionState aState = IDLE;
+	ActionState aState = ActionState::IDLE;
 
 	glm::vec2 pushDirection;
 	float pushStrength = 200.0f;

@@ -1,10 +1,8 @@
 #include "Game.h"
 
-#include <irrklang/irrKlang.h>
-using namespace irrklang;
-
 std::unique_ptr<TextRenderer> text, pixelText;
 ISoundEngine* sound = irrklang::createIrrKlangDevice();
+irrklang::ISound* snd;
 
 std::unique_ptr<Renderer> renderer;
 std::unique_ptr<Dungeon> dungeon;
@@ -25,6 +23,8 @@ void Game::Init()
 
     pixelText = std::make_unique<TextRenderer>(this->width, this->height);
     pixelText->Load("../fonts/Pixel.ttf", 24);
+
+    snd = sound->play2D(music[activeMusic], false, false, true);
 
     InitObjects();
     InitTextButtons();
@@ -109,6 +109,26 @@ void Game::LoadResources()
         ResourceManager::LoadTexture(("../textures/items/potions/msPotion_small_" + std::to_string(i) + ".png").c_str(), true, "msPotionSmall" + std::to_string(i));
         ResourceManager::LoadTexture(("../textures/items/potions/msPotion_" + std::to_string(i) + ".png").c_str(), true, "msPotion" + std::to_string(i));
     }
+
+    ResourceManager::LoadTexture("../textures/items/statScroll.png", true, "statScroll");
+    ResourceManager::LoadTexture("../textures/items/typeScroll.png", true, "typeScroll");
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // sounds
+    sound->setSoundVolume(0.4f);
+
+    gameSound.emplace("attack", sound->addSoundSourceFromFile("../sounds/attack.mp3"));
+    gameSound.emplace("drop", sound->addSoundSourceFromFile("../sounds/drop.mp3"));
+    gameSound.emplace("hit", sound->addSoundSourceFromFile("../sounds/hit.mp3"));
+    gameSound.emplace("skeleton", sound->addSoundSourceFromFile("../sounds/skeleton.mp3"));
+    gameSound.emplace("vampire", sound->addSoundSourceFromFile("../sounds/vampire.mp3"));
+    gameSound.emplace("use", sound->addSoundSourceFromFile("../sounds/use.mp3"));
+
+    for (size_t i = 0; i < 2; i++)
+    {
+        irrklang::ISoundSource* mus = sound->addSoundSourceFromFile(("../sounds/main_" + std::to_string(i) + ".mp3").c_str());
+        music.push_back(mus);
+        musicAmount++;
+    }
 }
 
 void Game::InitObjects()
@@ -130,7 +150,7 @@ void Game::InitObjects()
     {
         player->SetTexture("playerAttack" + std::to_string(i));
     }
-    player->AddAnimation("attack", 4, 3, 0.15f);
+    player->AddAnimation("attack", 4, 3, 0.115f);
     // - - - - - - - - - - - - - - - - - -
     exitObj = std::make_shared<ExitObject>(glm::vec2(9999.9f, 9999.9f), glm::vec2(50.0f));
     exitObj->SetTexture("exitTexture");
@@ -451,42 +471,47 @@ void Game::ProcessInventoryKeys()
     if (KeysProcessed[GLFW_KEY_1] || KeysProcessed[GLFW_KEY_2] || KeysProcessed[GLFW_KEY_3] || KeysProcessed[GLFW_KEY_4] || KeysProcessed[GLFW_KEY_5]
         || KeysProcessed[GLFW_KEY_6] || KeysProcessed[GLFW_KEY_7] || KeysProcessed[GLFW_KEY_8] || KeysProcessed[GLFW_KEY_9]) return;
 
+    bool used = false;
+
     if (Keys[GLFW_KEY_1]) {
-        player->UseItem(0);
+        used = player->UseItem(0);
         KeysProcessed[GLFW_KEY_1] = true;
     }
     else if (Keys[GLFW_KEY_2]) {
-        player->UseItem(1);
+        used = player->UseItem(1);
         KeysProcessed[GLFW_KEY_2] = true;
     }
     else if (Keys[GLFW_KEY_3]) {
-        player->UseItem(2);
+        used = player->UseItem(2);
         KeysProcessed[GLFW_KEY_3] = true;
     }
     else if (Keys[GLFW_KEY_4]) {
-        player->UseItem(3);
+        used = player->UseItem(3);
         KeysProcessed[GLFW_KEY_4] = true;
     }
     else if (Keys[GLFW_KEY_5]) {
-        player->UseItem(4);
+        used = player->UseItem(4);
         KeysProcessed[GLFW_KEY_5] = true;
     }
     else if (Keys[GLFW_KEY_6]) {
-        player->UseItem(5);
+        used = player->UseItem(5);
         KeysProcessed[GLFW_KEY_6] = true;
     }
     else if (Keys[GLFW_KEY_7]) {
-        player->UseItem(6);
+        used = player->UseItem(6);
         KeysProcessed[GLFW_KEY_7] = true;
     }
     else if (Keys[GLFW_KEY_8]) {
-        player->UseItem(7);
+        used = player->UseItem(7);
         KeysProcessed[GLFW_KEY_8] = true;
     }
     else if (Keys[GLFW_KEY_9]) {
-        player->UseItem(8);
+        used = player->UseItem(8);
         KeysProcessed[GLFW_KEY_9] = true;
     }
+
+    if (used)
+        sound->play2D(gameSound["use"]);
 }
 
 void Game::ProcessInput(float dt)
@@ -519,6 +544,7 @@ void Game::ProcessInput(float dt)
             player->Move(DIR_RIGHT, dt);
 
         if (mouseKeys[GLFW_MOUSE_BUTTON_LEFT] && !mouseKeysProcessed[GLFW_MOUSE_BUTTON_LEFT]) {
+            if (player->GetAction() == ActionState::IDLE) sound->play2D(gameSound["attack"]);
             player->Attack();
             mouseKeysProcessed[GLFW_MOUSE_BUTTON_LEFT] = true;
         }
@@ -544,7 +570,7 @@ void Game::ProcessInput(float dt)
             else i->SetTextColour(glm::vec3(0.4f));
         }
     }
-    else if (gmState == SETTINGS) 
+    else if (gmState == SETTINGS)
     {
         for (auto i : settingButtons)
         {
@@ -562,7 +588,10 @@ void Game::ProcessInput(float dt)
 
 void Game::Update(float dt)
 {
-    if (gmState == ACTIVE) {
+    PlayMusic();
+
+    if (gmState == ACTIVE) 
+    {
         // actions
         player->ProcessAction(dt);
         UpdateEnemies(dt);
@@ -573,8 +602,11 @@ void Game::Update(float dt)
             i->UpdateAABB();
         }
 
-        if (enemyList.empty() && !exitSpawned)
+        if (enemyList.empty() && !exitSpawned) 
+        {
             SpawnExit();
+            Enemy::statsMultiplier += 0.25f;
+        }
 
         // -
         UpdateAnimations(dt);
@@ -622,14 +654,16 @@ void Game::ProcessCollisions(float dt)
         // player attack and enemy collision
     for (auto i : enemyList)
     {
-        if (player->GetAction() == ATTACK && player->AttackCollision(i)) {
+        if (player->GetAction() == ActionState::ATTACK && player->AttackCollision(i)) {
             i->Hit(player->GetDamage(), player->GetAtkType());
             i->Push(player->GetPos());
+            if (!sound->isCurrentlyPlaying(gameSound["hit"])) sound->play2D(gameSound["hit"]);
         }
         else if (i->ObjectCollision(*player)) {
             i->ProcessCollision(*player, false, dt);
             player->Hit(i->GetDamage(), i->GetAtkType());
             player->Push(i->GetPos());
+            if (!sound->isCurrentlyPlaying(gameSound["hit"])) sound->play2D(gameSound["hit"]);
         }
     }
         // items
@@ -653,6 +687,7 @@ void Game::ProcessCollisions(float dt)
                 ch->Hit(proj->GetDamage(), PURE);
                 ch->Push(proj->GetPos());
                 proj->DeleteObject();
+                if (!sound->isCurrentlyPlaying(gameSound["hit"])) sound->play2D(gameSound["hit"]);
                 break;
             }
         }
@@ -691,6 +726,8 @@ void Game::ProcessDeaths()
 
             std::vector<std::shared_ptr<Item>> loot = enemy->GetLoot();
             if (!loot.empty()) {
+                sound->play2D(gameSound["drop"]);
+
                 objList.insert(objList.end(), loot.begin(), loot.end());
                 animObjList.insert(animObjList.end(), loot.begin(), loot.end());
                 itemList.insert(itemList.end(), loot.begin(), loot.end());
@@ -804,12 +841,12 @@ void Game::UpdateEnemies(float dt)
     for (auto i : enemyList)
     {
         i->CheckPlayer(player->GetPos());
-        if (i->GetAction() == ATTACK && !player->IsDamaged())
+        if (i->GetAction() == ActionState::ATTACK && !player->IsDamaged())
             i->Move(player->GetPos(), dt);
     }
     for (auto i : vampireList)
     {
-        if (i->GetAction() == ATTACK && !player->IsDamaged()) {
+        if (i->GetAction() == ActionState::ATTACK && !player->IsDamaged()) {
             std::shared_ptr<MagicSphere> projectile = i->Attack(player->GetPos(), dt);
             if (projectile) {
                 objList.push_back(projectile);
@@ -894,7 +931,7 @@ void Game::DrawDirectionArrow()
     DrawTexture(ResourceManager::GetTexture("arrowTexture"), playerCentre + position, glm::vec2(30.0f), glm::vec3(0.0f, 0.0f, angle - 90.0f));
 }
     // -----------
-void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size, glm::vec3 angle, float transparency, glm::vec3 colour) // menu texture
+void Game::DrawTexture(Texture texture, glm::vec2 position, glm::vec2 size, glm::vec3 angle, float transparency, glm::vec3 colour) // no view matrix textures
 {
     ResourceManager::GetShader("menuShader").Use();
     ResourceManager::GetShader("menuShader").SetMatrix4("projection", projection);
@@ -932,7 +969,7 @@ void Game::DrawMapObject(std::vector<std::shared_ptr<MapObject>> objects)
     }
 
     ResourceManager::GetShader("spriteShader").SetBool("instanced", true);
-    ResourceManager::GetShader("spriteShader").SetBool("menu", gmState == MENU);
+    ResourceManager::GetShader("spriteShader").SetBool("menu", gmState != ACTIVE);
 
 #ifdef _TESTING
     ResourceManager::GetShader("spriteShader").SetBool("test", false);
@@ -1025,6 +1062,15 @@ void Game::Render()
 }
 
 // utility
+void Game::PlayMusic() 
+{
+    if (!snd->isFinished()) return;
+
+    activeMusic < (musicAmount - 1) ? activeMusic++ : activeMusic = 0;
+
+    snd = sound->play2D(music[activeMusic], false, false, true);
+}
+
 int Game::GetRandomNumber(int min, int max)
 {
     int pseudoRandNum = 0;
@@ -1043,7 +1089,7 @@ int Game::GetRandomNumber(int min, int max)
 }
 
 template<typename T>
-void Game::EraseFromVector(std::vector<std::shared_ptr<T>>& vector) 
+void Game::EraseFromVector(std::vector<std::shared_ptr<T>>& vector)
 {
     vector.erase(
         std::remove_if(vector.begin(), vector.end(),
@@ -1067,7 +1113,7 @@ void Game::DeleteObjects()
 
 Game::~Game()
 {
-    delete sound;
+    sound->drop();
 
     objList.clear();
     // -----

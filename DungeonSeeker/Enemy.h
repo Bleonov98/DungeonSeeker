@@ -20,13 +20,14 @@ public:
 	float GetExpCost() { return expCost; }
 	std::vector<std::shared_ptr<Item>> GetLoot();
 
+	// only when +lvl
+	inline static float statsMultiplier = 1.0f;
+
 protected:
 
 	std::vector<DropEntry> drop;
 	AttackType atkType = PHYSICAL;
 	float visionRange = 300.0f, expCost = 25.0f;
-
-	inline static float statsMultiplier = 1.0f;
 
 };
 
@@ -49,7 +50,7 @@ public:
 	};
 	void Move(glm::vec2 playerPos, float dt) override;
 private:
-	float tpTimer = 0.0f, tpDelay = 2.5f;
+	float tpTimer = 1.0f, tpDelay = 1.5f;
 };
 
 class Vampire : public Enemy, public std::enable_shared_from_this<Vampire>
@@ -64,7 +65,7 @@ public:
 	};
 	std::shared_ptr<MagicSphere> Attack(glm::vec2 playerPos, float dt);
 private:
-	float atkTimer = 0.0f, atkDelay = 1.5f;
+	float atkTimer = 0.0f, atkDelay = 1.35f;
 };
 
 #endif // !ENEMY_H

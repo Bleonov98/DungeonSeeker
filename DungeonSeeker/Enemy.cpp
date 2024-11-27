@@ -8,9 +8,9 @@
 void Enemy::CheckPlayer(glm::vec2 playerPos)
 {
 	if (glm::distance(this->position, playerPos) <= visionRange)
-		aState = ATTACK;
+		aState = ActionState::ATTACK;
 	else
-		aState = IDLE;
+		aState = ActionState::IDLE;
 }
 
 void Enemy::Move(glm::vec2 playerPos, float dt)
@@ -28,9 +28,6 @@ void Enemy::Move(glm::vec2 playerPos, float dt)
 
 std::vector<std::shared_ptr<Item>> Enemy::GetLoot()
 {
-	//
-	static int multiplier = 0;
-
 	std::vector<std::shared_ptr<Item>> loot;
 	std::vector<ItemID> itemIDs;
 
@@ -38,19 +35,13 @@ std::vector<std::shared_ptr<Item>> Enemy::GetLoot()
 	std::mt19937 gen(rd());
 	std::uniform_int_distribution<> dis(0, 100);
 
-	int increasedRate = 2 * multiplier;
 	int num = dis(gen);
-	if (num > 10 + increasedRate) num -= increasedRate; // multiplier doesn't work for rare+ items
 	for (const auto& entry : drop) {
 		if (num <= entry.dropChance) {
 			itemIDs.push_back(entry.itemID);
 			break;
 		}
 	}
-
-	// increase the rates if there hasn’t been any loot for a long time
-	if (loot.empty()) multiplier++;
-	else multiplier = 0;
 
 	std::shared_ptr<Item> item;
 	for (auto i : itemIDs)

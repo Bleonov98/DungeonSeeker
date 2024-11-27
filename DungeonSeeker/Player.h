@@ -33,7 +33,7 @@ public:
 	bool AttackCollision(std::shared_ptr<Enemy> enemy);
 
 	void LevelUp(float experience);
-	void UseItem(int num);
+	bool UseItem(int num);
 	void AddToInventory(std::shared_ptr<Item> item) { inventory.AddItem(item); }
 	Inventory& GetInventory() { return this->inventory; }
 
@@ -73,7 +73,7 @@ private:
 
 	// attack
 	AABB daggerhBox;
-	float attackDuration = 0.45f, attackTimer = 0.0f;
+	float attackDuration = 0.35f, attackTimer = 0.0f;
 	
 	// stats
 	Inventory inventory;

@@ -9,6 +9,8 @@ void DynamicObject::AddAnimation(std::string animationName, unsigned int startIn
 
 void DynamicObject::PlayAnimation(float dt)
 {
+    if (animations.empty()) return;
+
     if (animator.AnimationPlayed(animations[currentAnimationName], dt)) {
         unsigned int maxIndex = animations[currentAnimationName].startIndex + animations[currentAnimationName].totalFrames;
         if (animations[currentAnimationName].currentIndex == maxIndex) animations[currentAnimationName].currentIndex = animations[currentAnimationName].startIndex;

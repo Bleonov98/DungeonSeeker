@@ -1,6 +1,9 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <irrklang/irrKlang.h>
+using namespace irrklang;
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -116,6 +119,8 @@ public:
 	void SpawnExit();
 
 	// utility
+	void PlayMusic();
+
 	int GetRandomNumber(int min, int max);
 	template<typename T>
 	void EraseFromVector(std::vector<std::shared_ptr<T>>& vector);
@@ -131,6 +136,11 @@ private:
 
 	Camera camera;
 	glm::mat4 projection, view = glm::mat4(1.0f);
+
+	// sound
+	std::unordered_map<std::string, irrklang::ISoundSource*> gameSound;
+	std::vector<irrklang::ISoundSource*> music;
+	int activeMusic = 0, musicAmount = 0;
 
 	// buttons
 	std::vector<std::shared_ptr<TextButton>> menuButtons;

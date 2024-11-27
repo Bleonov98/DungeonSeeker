@@ -2,7 +2,7 @@
 
 void Player::Move(MoveDirection dir, float dt)
 {
-	if (aState != IDLE) return;
+	if (aState != ActionState::IDLE) return;
 	
 	static MoveDirection lastTextureDir = DIR_RIGHT;
 
@@ -33,10 +33,10 @@ void Player::Move(MoveDirection dir, float dt)
 
 void Player::ProcessAction(float dt)
 {
-	if (aState == ATTACK) {
+	if (aState == ActionState::ATTACK) {
 		attackTimer += dt;
 		if (attackTimer >= attackDuration) {
-			aState = IDLE;
+			aState = ActionState::IDLE;
 			currentAnimationName = "main";
 			attackTimer = 0.0f;
 		}
@@ -56,9 +56,9 @@ void Player::ProcessAction(float dt)
 
 void Player::Attack()
 {
-	if (aState != IDLE) return;
+	if (aState != ActionState::IDLE) return;
 
-	aState = ATTACK;
+	aState = ActionState::ATTACK;
 	currentAnimationName = "attack";
 }
 
@@ -81,22 +81,23 @@ void Player::LevelUp(float experience)
 		armor += 1.0f;
 		resist += 0.5f;
 
-		expThreshold += 25.0f;
+		expThreshold += 150.0f;
 	}
 }
 
-void Player::UseItem(int keyIndex)
+bool Player::UseItem(int keyIndex)
 {
 	int invIndex = 0;
 	for (auto i : inventory.GetItems())
 	{
 		if (invIndex == keyIndex)
 		{
-			if (inventory.RemoveItem(i.first)) 
+			if (inventory.RemoveItem(i.first))
 			{
 				itemHandlers.find(i.first)->second();
+				return true;
 			}
-			break;
+			else return false;
 		}
 		invIndex++;
 	}
