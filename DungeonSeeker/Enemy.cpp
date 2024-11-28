@@ -94,6 +94,19 @@ std::vector<std::shared_ptr<Item>> Enemy::GetLoot()
 	return loot;
 }
 
+bool Enemy::ActionChanged()
+{
+	bool result;
+
+	if (aState == ActionState::ATTACK && prevState != ActionState::ATTACK)
+		result = true;
+	else
+		result = false;
+	
+	prevState = aState;
+	return result;
+}
+
 void Skull::Move(glm::vec2 playerPos, float dt)
 {
 	if (damaged) return;
@@ -130,6 +143,7 @@ void Skull::Move(glm::vec2 playerPos, float dt)
 
 		position = playerPos + distance;
 		tpTimer = 0.0f;
+		sndEngine->play2D(sound["tp"]);
 	}
 	else {
 		this->position += direction * speed * dt;

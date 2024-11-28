@@ -1,9 +1,9 @@
 #include "Game.h"
 
-std::unique_ptr<TextRenderer> text, pixelText;
 ISoundEngine* sound = irrklang::createIrrKlangDevice();
 irrklang::ISound* snd;
 
+std::unique_ptr<TextRenderer> text, pixelText;
 std::unique_ptr<Renderer> renderer;
 std::unique_ptr<Dungeon> dungeon;
 
@@ -122,6 +122,7 @@ void Game::LoadResources()
     gameSound.emplace("skeleton", sound->addSoundSourceFromFile("../sounds/skeleton.mp3"));
     gameSound.emplace("vampire", sound->addSoundSourceFromFile("../sounds/vampire.mp3"));
     gameSound.emplace("use", sound->addSoundSourceFromFile("../sounds/use.mp3"));
+    gameSound.emplace("tp", sound->addSoundSourceFromFile("../sounds/tp.mp3"));
 
     for (size_t i = 0; i < 2; i++)
     {
@@ -732,6 +733,7 @@ void Game::ProcessDeaths()
                 animObjList.insert(animObjList.end(), loot.begin(), loot.end());
                 itemList.insert(itemList.end(), loot.begin(), loot.end());
             }
+            enemy->PlaySound();
         }
     }
 
@@ -800,7 +802,10 @@ void Game::SpawnEnemy()
     std::shared_ptr<Enemy> enemy;
     if (type == SKELETON)
     {
-        std::shared_ptr<Skeleton> skeleton = std::make_shared<Skeleton>(enemyPos, player->GetSize(), 175.0f, GetItemsByRarity(ItemRarity::COMMON));
+        std::shared_ptr<Skeleton> skeleton = std::make_shared<Skeleton>(enemyPos, player->GetSize(), 175.0f, GetItemsByRarity(ItemRarity::COMMON), sound);
+
+        skeleton->SetSound("main", gameSound["skeleton"]);
+
         for (size_t i = 0; i < 4; i++)
         {
             skeleton->SetTexture("skeleton" + std::to_string(i));
@@ -810,7 +815,11 @@ void Game::SpawnEnemy()
     }
     else if (type == SKULL)
     {
-        std::shared_ptr<Skull> skull = std::make_shared<Skull>(enemyPos, player->GetSize(), 150.0f, GetItemsByRarity(ItemRarity::RARE));
+        std::shared_ptr<Skull> skull = std::make_shared<Skull>(enemyPos, player->GetSize(), 150.0f, GetItemsByRarity(ItemRarity::RARE), sound);
+
+        skull->SetSound("main", gameSound["skeleton"]);
+        skull->SetSound("tp", gameSound["tp"]);
+
         for (size_t i = 0; i < 4; i++)
         {
             skull->SetTexture("skull" + std::to_string(i));
@@ -820,7 +829,10 @@ void Game::SpawnEnemy()
     }
     else
     {
-        std::shared_ptr<Vampire> vamp = std::make_shared<Vampire>(enemyPos, player->GetSize(), 125.0f, GetItemsByRarity(ItemRarity::UNIQUE));
+        std::shared_ptr<Vampire> vamp = std::make_shared<Vampire>(enemyPos, player->GetSize(), 125.0f, GetItemsByRarity(ItemRarity::UNIQUE), sound);
+
+        vamp->SetSound("main", gameSound["vampire"]);
+
         for (size_t i = 0; i < 4; i++)
         {
             vamp->SetTexture("vamp" + std::to_string(i));
@@ -1064,6 +1076,12 @@ void Game::Render()
 // utility
 void Game::PlayMusic() 
 {
+    for (auto en : enemyList)
+    {
+        if (en->ActionChanged())
+            en->PlaySound();
+    }
+
     if (!snd->isFinished()) return;
 
     activeMusic < (musicAmount - 1) ? activeMusic++ : activeMusic = 0;
@@ -1113,10 +1131,28 @@ void Game::DeleteObjects()
 
 Game::~Game()
 {
+    gameSound.clear();
+    music.clear();
+
+    if (snd) 
+        snd->drop();
     sound->drop();
 
+    // - - - -
+    grid.clear();
+    mainTileList.clear();
+    mapObjList.clear();
+
     objList.clear();
-    // -----
+    animObjList.clear();
+    characterList.clear();
+
+    enemyList.clear();
+    vampireList.clear();
+    projectileList.clear();
+    itemList.clear();
+
+    // - - - -
     menuButtons.clear();
     settingButtons.clear();
 }

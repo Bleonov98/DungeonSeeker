@@ -1,9 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <irrklang/irrKlang.h>
-using namespace irrklang;
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 

@@ -1,6 +1,9 @@
 #ifndef RESOURCE_H
 #define RESOURCE_H
 
+#include <irrklang/irrKlang.h>
+using namespace irrklang;
+
 #include "Texture.h"
 #include "Shader.h"
 
