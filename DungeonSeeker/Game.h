@@ -33,8 +33,8 @@ enum TileType {
 
 enum GameState {
 	MENU,
-	SETTINGS,
-	ACTIVE
+	ACTIVE,
+	END
 };
 
 struct Grid {
@@ -75,6 +75,7 @@ public:
 	void LoadResources();
 	void InitObjects();
 	void InitTextButtons();
+	void Restart();
 
 	void ProcessInventoryKeys();
 	void ProcessInput(float dt);
@@ -106,7 +107,6 @@ public:
 	void DrawDirectionArrow();
 	
 	void Menu();
-	void Settings();
 
 	// game
 	std::vector<DropEntry> GetItemsByRarity(ItemRarity rarity);
@@ -141,7 +141,6 @@ private:
 
 	// buttons
 	std::vector<std::shared_ptr<TextButton>> menuButtons;
-	std::vector<std::shared_ptr<TextButton>> settingButtons;
 
 	// map
 	std::vector<std::vector<std::shared_ptr<Grid>>> grid;

@@ -167,21 +167,16 @@ void Game::InitTextButtons()
     start->SetFunction([&]() { this->gmState = ACTIVE; });
     menuButtons.push_back(start);
 
-    std::shared_ptr<TextButton> settings = std::make_shared<TextButton>("Settings", glm::vec2(this->width / 2.0f - 40.0f, this->height / 2.0f + 10.0f), this->width, this->height);
-    settings->Load("../fonts/Garamond.ttf", 24);
-    settings->SetFunction([&]() { this->gmState = SETTINGS; });
-    menuButtons.push_back(settings);
-
     std::shared_ptr<TextButton> exit = std::make_shared<TextButton>("Exit", glm::vec2(this->width / 2.0f - 22.0f, this->height / 2.0f + 40.0f), this->width, this->height);
     exit->Load("../fonts/Garamond.ttf", 24);
     exit->SetFunction([&]() { this->close = true; });
     menuButtons.push_back(exit);
 
-    // settings
-    std::shared_ptr<TextButton> back = std::make_shared<TextButton>("Back", glm::vec2(this->width / 2.0f - 22.0f, this->height / 2.0f + 40.0f), this->width, this->height);
-    back->Load("../fonts/Garamond.ttf", 24);
-    back->SetFunction([&]() { this->gmState = MENU; });
-    settingButtons.push_back(back);
+    // end
+    std::shared_ptr<TextButton> restart = std::make_shared<TextButton>("Restart", glm::vec2(this->width / 2.0f - 30.0f, this->height / 2.0f - 20.0f), this->width, this->height);
+    restart->Load("../fonts/Garamond.ttf", 24);
+    restart->SetFunction([&]() { Restart(); });
+    menuButtons.push_back(restart);
 }
 
 void Game::Menu()
@@ -192,19 +187,9 @@ void Game::Menu()
 
     for (size_t i = 0; i < menuButtons.size(); i++)
     {
+        if (gmState == END && i == 0) continue;
+        else if (gmState != END && i == 2) continue;
         menuButtons[i]->RenderButton(1.0f);
-    }
-}
-
-void Game::Settings()
-{
-    DrawTexture(ResourceManager::GetTexture("menuTexture"), glm::vec2(650.0f, 275.0f), glm::vec2(300.0f));
-
-    text->RenderText("SETTINGS", glm::vec2(this->width / 2.0f - 95.0f, this->height / 2.0f - 120.0f), 1.75f);
-
-    for (auto i : settingButtons)
-    {
-        i->RenderButton(1.0f);
     }
 }
 
@@ -466,6 +451,37 @@ void Game::ClearMap()
     itemList.clear();
 }
 
+void Game::Restart()
+{
+    ClearMap();
+    
+    Grid cell(0);
+    
+    // PLAYER INITIALIZATION
+    player = std::make_shared<Player>(glm::vec2(0, 0), cell.cellSize * 1.75f, 175.0f);
+    // walking-stand textures + animation
+    for (size_t i = 0; i < 4; i++)
+    {
+        player->SetTexture("player" + std::to_string(i));
+    }
+    player->AddAnimation("main", 0, 4, 0.4f, true);
+    // attack textures + animations
+    for (size_t i = 0; i < 3; i++)
+    {
+        player->SetTexture("playerAttack" + std::to_string(i));
+    }
+    player->AddAnimation("attack", 4, 3, 0.115f);
+    // - - - - - - - - - - - - - - - - - -
+    exitObj = std::make_shared<ExitObject>(glm::vec2(9999.9f, 9999.9f), glm::vec2(50.0f));
+    exitObj->SetTexture("exitTexture");
+
+    Enemy::statsMultiplier = 1.0f;
+    // - - - - - - - - - - - - - - - - - -
+    GenerateDungeon();
+
+    gmState = ACTIVE;
+}
+
 // main
 void Game::ProcessInventoryKeys()
 {
@@ -557,24 +573,13 @@ void Game::ProcessInput(float dt)
             KeysProcessed[GLFW_KEY_I] = true;
         }
     }
-    else if (gmState == MENU) 
+    else  
     {
         for (auto i : menuButtons)
         {
-            if (i->TextCollision(xMouse, yMouse)) {
-                i->SetTextColour(glm::vec3(0.9f));
-                if (mouseKeys[GLFW_MOUSE_BUTTON_LEFT] && !mouseKeysProcessed[GLFW_MOUSE_BUTTON_LEFT]) {
-                    i->CallFunction();
-                    mouseKeysProcessed[GLFW_MOUSE_BUTTON_LEFT] = true;
-                }
-            }
-            else i->SetTextColour(glm::vec3(0.4f));
-        }
-    }
-    else if (gmState == SETTINGS)
-    {
-        for (auto i : settingButtons)
-        {
+            if (gmState != END && i == menuButtons[2]) continue;
+            else if (gmState == END && i == menuButtons[0]) continue;
+
             if (i->TextCollision(xMouse, yMouse)) {
                 i->SetTextColour(glm::vec3(0.9f));
                 if (mouseKeys[GLFW_MOUSE_BUTTON_LEFT] && !mouseKeysProcessed[GLFW_MOUSE_BUTTON_LEFT]) {
@@ -743,6 +748,9 @@ void Game::ProcessDeaths()
             ch->DeleteObject();
         }
     }
+
+    if (player->IsDead()) 
+        gmState = END;
 }
 
 // game
@@ -886,9 +894,13 @@ void Game::ShowPlayerStatusBar()
     // Status bars
     DrawTexture(ResourceManager::GetTexture("menuTexture"), glm::vec2(25.0f), glm::vec2(250.0f, 135.0f));
 
+        // hp
+    float hpPercentage = player->GetHpPercentage();
+    if (hpPercentage < 0.0f) hpPercentage = 0.0f;
     DrawTexture(ResourceManager::GetTexture("healthBarWrapTexture"), glm::vec2(60.0f, 40.0f), glm::vec2(180.0f, 50.0f));
-    DrawTexture(ResourceManager::GetTexture("healthBarTexture"), glm::vec2(110.0f, 57.0f), glm::vec2(player->GetHpPercentage() * 118.0f, 15.0f));
+    DrawTexture(ResourceManager::GetTexture("healthBarTexture"), glm::vec2(110.0f, 57.0f), glm::vec2(hpPercentage * 118.0f, 15.0f));
 
+        // exp
     DrawTexture(ResourceManager::GetTexture("expBarWrapTexture"), glm::vec2(60.0f, 95.0f), glm::vec2(180.0f, 50.0f));
     DrawTexture(ResourceManager::GetTexture("expBarTexture"), glm::vec2(110.0f, 112.0f), glm::vec2(player->GetExpPercentage() * 118.0f, 15.0f));
 
@@ -1067,10 +1079,11 @@ void Game::Render()
     dungeon->DrawDungeon(camera.cameraPos);
 #endif
 
-    if (gmState == MENU) Menu();
-    else if (gmState == SETTINGS) Settings();
-
-    if (gmState != ACTIVE) DrawTexture(ResourceManager::GetTexture("cursorTexture"), glm::vec2(xMouse, yMouse), glm::vec2(30.0f, 32.0f));
+    if (gmState != ACTIVE) 
+    {
+        Menu();
+        DrawTexture(ResourceManager::GetTexture("cursorTexture"), glm::vec2(xMouse, yMouse), glm::vec2(30.0f, 32.0f));
+    }
 }
 
 // utility
@@ -1154,5 +1167,4 @@ Game::~Game()
 
     // - - - -
     menuButtons.clear();
-    settingButtons.clear();
 }
